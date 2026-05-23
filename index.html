@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fuse Void | Professional Drum Machine</title>
     <link rel="icon" type="image/png" href="FuseVoid_Export_favicon (3).png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Michroma&family=Audiowide&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <style>
@@ -21,6 +21,7 @@
             --page-pad: 2.8rem;
             --split-x: 50%;
             --right-cx: 75%;
+            --font-display: 'Michroma', 'Audiowide', system-ui, sans-serif;
         }
         @media (min-width:1024px) {
             :root { --page-pad: 6.4rem; }
@@ -31,8 +32,75 @@
             font-family: 'Inter', system-ui, sans-serif;
             overflow-x: hidden; -webkit-font-smoothing: antialiased;
         }
-        .h1 { font-size: clamp(1.65rem, 3.6vw, 3.15rem); font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; }
-        .h2 { font-size: clamp(1.1rem, 2.2vw, 1.55rem); font-weight: 400; }
+        .h1 {
+            font-family: var(--font-display);
+            font-size: clamp(1.65rem, 3.6vw, 3.15rem);
+            font-weight: 400;
+            line-height: 1.08;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .h2 { font-size: clamp(1.1rem, 2.2vw, 1.55rem); font-weight: 400; font-family: 'Inter', system-ui, sans-serif; }
+        /* Büyük başlıklar — geniş geometrik display */
+        .stack-title,
+        .triple-title,
+        .engine-dual,
+        .footer-title {
+            font-family: var(--font-display);
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1.1;
+        }
+        .stack-title p,
+        .triple-title p,
+        .engine-dual p {
+            white-space: nowrap;
+            font-size: clamp(0.82rem, 2.05vw, 2.28rem);
+            max-width: 100%;
+        }
+        @media (max-width:1023px) {
+            .stack-title p,
+            .triple-title p,
+            .engine-dual p {
+                font-size: clamp(0.68rem, 3.6vw, 1.28rem);
+            }
+        }
+        .footer-title .dim { font-style: normal; }
+        .split-word { display: inline-block; white-space: nowrap; }
+        .split-char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(110%);
+            overflow: hidden;
+            vertical-align: top;
+            line-height: 1.12;
+            padding: 0 0.01em;
+        }
+        .split-glyph {
+            display: inline-block;
+            transform-origin: center center;
+            background: linear-gradient(135deg, #ff1a3d 0%, #ffffff 38%, #b44dff 72%, #ff1a3d 100%);
+            background-size: 320% 320%;
+            background-position: 0% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glyph-idle 3.8s ease-in-out infinite, glyph-color 10s ease-in-out infinite;
+            animation-delay: calc(var(--ci, 0) * 0.065s), calc(var(--ci, 0) * 0.09s);
+        }
+        @keyframes glyph-idle {
+            0%, 100% { transform: scale(1) skewX(0deg); }
+            30% { transform: scale(0.9, 1.07) skewX(-2.5deg); }
+            60% { transform: scale(1.05, 0.93) skewX(2deg); }
+        }
+        @keyframes glyph-color {
+            0% { background-position: 0% 100%; }
+            50% { background-position: 100% 0%; }
+            100% { background-position: 0% 100%; }
+        }
+        .panel.is-active .split-glyph { animation-play-state: running; }
+        .panel:not(.is-active) .split-glyph { animation-play-state: paused; }
         .body-copy { font-size: clamp(0.78rem, 1vw, 0.88rem); font-weight: 300; line-height: 1.65; color: rgba(238,238,238,0.72); max-width: 22rem; }
 
         /* güvenli alan — header + section-id için */
@@ -375,9 +443,9 @@
 
         #panel-0 { align-items: stretch; padding-bottom: 2.4rem; }
         @media (min-width:768px) { #panel-0 { padding-bottom: 4.8rem; } }
-        #panel-0 .triple-title p:nth-child(1) { color: rgba(238,238,238,0.48); }
-        #panel-0 .triple-title p:nth-child(2) { color: rgba(238,238,238,0.78); }
-        #panel-0 .triple-title p:nth-child(3) { color: #ffffff; }
+        #panel-0 .triple-title p:nth-child(1) .split-glyph { filter: brightness(0.72); }
+        #panel-0 .triple-title p:nth-child(2) .split-glyph { filter: brightness(0.88); }
+        #panel-0 .triple-title p:nth-child(3) .split-glyph { filter: brightness(1); }
         .hero-tagline-box {
             display: inline-flex;
             flex-wrap: wrap;
@@ -444,13 +512,9 @@
             max-width: min(44vw, 36rem);
         }
         @media (min-width:1024px) {
-            #panel-3 .engine-dual {
-                font-size: clamp(2.1rem, 4.8vw, 4.2rem);
-                line-height: 1.02;
-            }
-            #panel-3 .engine-dual p:last-child {
-                margin-left: 1.25rem;
-                margin-top: 0.2em;
+            #panel-3 .engine-dual p {
+                font-size: clamp(1rem, 2.5vw, 2.85rem);
+                letter-spacing: 0.04em;
             }
             #panel-3 .panel-copy {
                 font-size: clamp(0.92rem, 1.25vw, 1.08rem);
@@ -538,7 +602,7 @@
             transform: translateX(-50%);
             text-align: center;
         }
-        .footer-title { margin-bottom: 1rem; font-size: clamp(1.15rem, 2.6vw, 1.85rem); font-weight: 300; line-height: 1.15; z-index: 2; max-width: 90vw; }
+        .footer-title { margin-bottom: 1rem; font-size: clamp(1.15rem, 2.6vw, 1.85rem); line-height: 1.12; z-index: 2; max-width: 90vw; }
         .footer-title .dim { opacity: 0.25; font-style: italic; display: block; margin-top: 0.2em; }
         .footer-cta { margin-bottom: 1.5rem; }
         .specs-block {
@@ -639,7 +703,6 @@
         .panel-cta { position: absolute; right: 2.8rem; bottom: 3rem; z-index: 2; }
         @media (min-width:1024px) { .panel-cta { display: none; } }
 
-        .split-char { display: inline-block; opacity: 0; transform: translateY(110%); }
         .nav-dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 90; }
         .nav-dots button { width: 6px; height: 6px; border-radius: 50%; border: none; background: rgba(155,184,225,0.25); cursor: pointer; padding: 0; transition: 0.3s; }
         .nav-dots button.on { background: var(--muted); transform: scale(1.4); }
@@ -731,8 +794,7 @@
                 <div class="panel-inner panel-inner--wide">
                     <div class="triple-title h1 split-block">
                         <p>Shape your rhythm</p>
-                        <p>with micro</p>
-                        <p>timing</p>
+                        <p>with micro timing</p>
                     </div>
                     <div class="panel-copy-right">
                         <p class="body-copy split-block">Precision groove offset and swing control. Master the Kaos-style XY pad — lo-fi crush, sidechain pump, filtered delays.</p>
@@ -872,6 +934,22 @@
         document.getElementById('feat-prev').onclick = () => showFeat(featIdx - 1);
         document.getElementById('feat-next').onclick = () => showFeat(featIdx + 1);
 
+        function splitDisplayEl(el) {
+            if (el.dataset.split) return;
+            el.dataset.split = '1';
+            let ci = 0;
+            const parts = el.textContent.split(/(\s+)/);
+            el.innerHTML = parts.map(part => {
+                if (/^\s+$/.test(part)) return part;
+                const chars = [...part].map(c => {
+                    const html = `<span class="split-char"><span class="split-glyph" style="--ci:${ci}">${c}</span></span>`;
+                    ci++;
+                    return html;
+                }).join('');
+                return `<span class="split-word">${chars}</span>`;
+            }).join('');
+        }
+
         function splitEl(el) {
             if (el.dataset.split) return;
             el.dataset.split = '1';
@@ -879,8 +957,16 @@
                 c === ' ' ? ' ' : `<span class="split-char">${c}</span>`
             ).join('');
         }
-        document.querySelectorAll('.split-text').forEach(splitEl);
-        document.querySelectorAll('.split-block').forEach(el => el.querySelectorAll('p').forEach(splitEl));
+        document.querySelectorAll('.split-text').forEach(el => {
+            if (el.closest('.footer-title')) splitDisplayEl(el);
+            else splitEl(el);
+        });
+        document.querySelectorAll('.split-block').forEach(el => {
+            el.querySelectorAll('p').forEach(p => {
+                if (p.closest('.stack-title, .triple-title, .engine-dual')) splitDisplayEl(p);
+                else splitEl(p);
+            });
+        });
 
         const panels = [...document.querySelectorAll('.panel')];
         const PANEL_COUNT = panels.length;
