@@ -66,14 +66,14 @@
         .triple-title p,
         .engine-dual p {
             white-space: nowrap;
-            font-size: clamp(0.92rem, 2.45vw, 2.65rem);
+            font-size: clamp(1.05rem, 3.1vw, 3.35rem);
             max-width: 100%;
         }
         @media (max-width:1023px) {
             .stack-title p,
             .triple-title p,
             .engine-dual p {
-                font-size: clamp(0.72rem, 3.4vw, 1.45rem);
+                font-size: clamp(0.82rem, 4vw, 1.75rem);
             }
         }
         .footer-title .dim { font-style: normal; }
@@ -577,7 +577,7 @@
         }
         @media (min-width:1024px) {
             #panel-3 .engine-dual p {
-                font-size: clamp(1rem, 2.75vw, 2.85rem);
+                font-size: clamp(1.15rem, 3.4vw, 3.5rem);
                 letter-spacing: -0.02em;
             }
             #panel-3 .panel-copy {
@@ -666,7 +666,7 @@
             transform: translateX(-50%);
             text-align: center;
         }
-        .footer-title { margin-bottom: 1rem; font-size: clamp(1.35rem, 3.2vw, 2.35rem); line-height: 1.12; z-index: 2; max-width: 90vw; }
+        .footer-title { margin-bottom: 1rem; font-size: clamp(1.55rem, 3.8vw, 2.85rem); line-height: 1.12; z-index: 2; max-width: 90vw; }
         .footer-title .dim { opacity: 0.25; font-style: italic; display: block; margin-top: 0.2em; }
         .footer-cta { margin-bottom: 1.5rem; }
         .specs-block {
@@ -1040,7 +1040,7 @@
                 const maxW = parent.getBoundingClientRect().width - 6;
                 const blockW = block.scrollWidth;
                 if (blockW > maxW && maxW > 0) {
-                    const scale = Math.max(0.52, maxW / blockW);
+                    const scale = Math.max(0.58, maxW / blockW);
                     block.style.transform = `scale(${scale})`;
                     block.style.transformOrigin = innerWidth >= 1024 ? 'left center' : 'center center';
                 }
