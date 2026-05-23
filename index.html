@@ -529,6 +529,7 @@
             };
             dotsWrap.appendChild(b);
         });
+        if (dotsWrap.children[0]) dotsWrap.children[0].classList.add('on');
 
         function switchPanel(idx) {
             if (idx === currentPanel) return;
