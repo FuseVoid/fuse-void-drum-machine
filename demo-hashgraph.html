@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuse Void | Professional Drum Machine</title>
+    <link rel="icon" type="image/png" href="FuseVoid_Export_favicon (3).png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #000209;
+            --text: #eeeeee;
+            --muted: #9bb8e1;
+            --accent: #5ec4ff;
+            --grad-a: #9bb8e1;
+            --grad-b: #2c4e73;
+            --line: rgba(155, 184, 225, 0.25);
+            --page-pad: 2.8rem;
+            --split-x: 50%;
+            --right-cx: 75%;
+        }
+        @media (min-width:1024px) {
+            :root { --page-pad: 6.4rem; }
+        }
+        html { scroll-behavior: auto; }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow-x: hidden; -webkit-font-smoothing: antialiased;
+        }
+        .h1 { font-size: clamp(1.65rem, 3.6vw, 3.15rem); font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; }
+        .h2 { font-size: clamp(1.1rem, 2.2vw, 1.55rem); font-weight: 400; }
+        .body-copy { font-size: clamp(0.78rem, 1vw, 0.88rem); font-weight: 300; line-height: 1.65; color: rgba(238,238,238,0.72); max-width: 22rem; }
+
+        /* güvenli alan — header + section-id için */
+        .panel-inner {
+            grid-column: 1 / -1;
+            width: 100%;
+            max-height: calc(100vh - 9.5rem);
+            padding-top: 5.5rem;
+            padding-bottom: 4.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+            overflow: hidden;
+        }
+        @media (min-width:1024px) {
+            .panel-inner { padding-top: 6rem; max-height: calc(100vh - 10rem); }
+        }
+        /* simetrik düzen: sol 50% metin | sağ 50% FX + cihaz */
+        @media (min-width:1024px) {
+            .panel-inner {
+                grid-column: 1 / span 5;
+                max-width: min(36vw, 28rem);
+                padding-left: 0;
+                margin-left: 0;
+                justify-content: center;
+            }
+            .panel-inner--wide { grid-column: 1 / span 5; max-width: min(36vw, 28rem); }
+        }
+        @media (max-width:1023px) {
+            .panel-inner { padding-bottom: 46vh; align-items: center; text-align: center; }
+            .stack-title, .triple-title, .engine-dual { text-align: center; }
+            .stack-title p, .triple-title p, .engine-dual p { margin-left: 0 !important; }
+            .body-copy { margin-left: auto; margin-right: auto; }
+            .device-duo { gap: 0.65rem; }
+            .device-shell--phone { max-height: 140px; }
+            #device-stage.phone-only .device-shell--phone { max-height: min(62vh, 520px); }
+        }
+        #device-stage {
+            position: fixed; z-index: 4;
+            left: var(--right-cx);
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: min(calc(44vw - var(--page-pad)), 520px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.45s ease, width 0.35s ease;
+        }
+        #device-stage.is-live { pointer-events: auto; }
+        /* 1. sayfa — video sağda, metin solda */
+        #device-stage.is-video-only {
+            left: var(--right-cx);
+            width: min(calc(52vw - var(--page-pad)), 880px);
+            max-height: calc(100vh - 5rem);
+        }
+        /* 2. sayfa — sadece iPad slide */
+        #device-stage.is-ipad-only {
+            width: min(calc(54vw - var(--page-pad)), 900px);
+            max-height: calc(100vh - 5rem);
+        }
+        #device-stage.is-ipad-only .device-col--ipad { width: 100%; }
+        #device-stage.is-ipad-only .device-col--phone { display: none !important; }
+        /* 3. sayfa — sadece iPhone */
+        #device-stage.phone-only {
+            width: min(calc(44vw - var(--page-pad)), 460px);
+        }
+        #device-stage.phone-only #device-col-phone { display: flex !important; }
+        #device-stage.phone-only .device-col--ipad { display: none !important; }
+        #device-stage.phone-only .device-shell--phone {
+            max-height: min(74vh, 680px);
+            aspect-ratio: 9 / 19;
+        }
+        #device-stage.has-phone:not(.is-video-only):not(.phone-only):not(.is-ipad-only) {
+            width: min(calc(48vw - var(--page-pad)), 600px);
+        }
+        @media (max-width:1023px) {
+            #device-stage {
+                left: 50%; top: auto; bottom: 8%;
+                transform: translateX(-50%);
+                width: min(92vw, 420px);
+            }
+            #device-stage.is-video-only {
+                width: min(96vw, 620px);
+                bottom: 6%;
+                left: 50%;
+            }
+            #device-stage.is-ipad-only {
+                width: min(96vw, 600px);
+                bottom: 5%;
+            }
+            #device-stage.phone-only {
+                width: min(90vw, 400px);
+                bottom: 5%;
+            }
+            #device-stage.phone-only .device-shell--phone {
+                max-height: min(64vh, 560px);
+            }
+            .panel-inner { padding-bottom: 46vh; }
+            .device-duo { gap: 0.65rem; }
+            .device-shell--phone { max-height: 140px; }
+        }
+        .device-stage__inner {
+            display: flex; align-items: center; gap: 0.45rem;
+            width: 100%;
+        }
+        #device-stage.is-video-only .device-stage__inner,
+        #device-stage.is-ipad-only .device-stage__inner {
+            position: relative;
+            gap: 0;
+        }
+        #device-stage.is-video-only .device-arrow,
+        #device-stage.is-ipad-only .device-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            z-index: 6;
+            background: rgba(0,2,9,0.82);
+        }
+        #device-stage.is-video-only #dev-prev,
+        #device-stage.is-ipad-only #dev-prev { left: 0.35rem; }
+        #device-stage.is-video-only #dev-next,
+        #device-stage.is-ipad-only #dev-next { right: 0.35rem; }
+        #device-stage.is-video-only .device-duo,
+        #device-stage.is-ipad-only .device-duo { width: 100%; padding: 0 0.15rem; }
+        #device-stage.is-video-only .device-label,
+        #device-stage.is-ipad-only .device-label { display: none; }
+        #device-stage.is-video-only .device-shell,
+        #device-stage.is-ipad-only .device-shell {
+            padding: 10px;
+            border-radius: 1.4rem;
+            box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9), 0 0 0 1px rgba(155,184,225,0.08);
+        }
+        #device-stage.is-video-only .device-shell--ipad,
+        #device-stage.is-ipad-only .device-shell--ipad {
+            aspect-ratio: 4 / 3;
+            width: 100%;
+        }
+        #device-stage.is-video-only .device-arrow,
+        #device-stage.is-video-only .device-dots { display: none; }
+        .device-duo {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 0.85rem;
+            min-height: 0;
+        }
+        .device-duo--solo { justify-content: center; }
+        .device-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .device-col--ipad { flex: 1.35; min-width: 0; }
+        .device-col--phone { flex: 0.55; min-width: 0; }
+        .device-label {
+            font-size: 8px; font-weight: 700; letter-spacing: 0.32em;
+            text-transform: uppercase; color: rgba(155,184,225,0.45);
+        }
+        .device-viewport { flex: 1; width: 100%; opacity: 1; }
+        .device-shell {
+            width: 100%; padding: 7px;
+            background: rgba(8,12,20,0.92); border-radius: 1.1rem;
+            border: 1px solid var(--line);
+            box-shadow: 0 32px 64px -24px rgba(0,0,0,0.85);
+            overflow: hidden;
+        }
+        .device-shell--ipad { aspect-ratio: 4/3; position: relative; }
+        .device-shell--phone { aspect-ratio: 9/19; max-height: min(28vh, 200px); }
+        .video-controls {
+            display: none;
+            position: absolute;
+            left: 50%; bottom: 0.85rem;
+            transform: translateX(-50%);
+            z-index: 9;
+            gap: 0.65rem;
+            align-items: center;
+            padding: 0.35rem 0.65rem 0.35rem 0.45rem;
+            border-radius: 999px;
+            background: rgba(0,2,9,0.72);
+            border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+        }
+        .device-shell.is-video-active .video-controls { display: flex; }
+        .video-play-btn {
+            width: 2.5rem; height: 2.5rem;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(0,2,9,0.78);
+            color: #fff;
+            font-size: 0.8rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.25s, border-color 0.25s, transform 0.25s;
+        }
+        .video-play-btn:hover {
+            background: rgba(155,184,225,0.2);
+            border-color: var(--muted);
+            transform: scale(1.06);
+        }
+        .video-volume {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-width: 7.5rem;
+        }
+        .video-volume__icon {
+            font-size: 0.75rem;
+            line-height: 1;
+            opacity: 0.85;
+            flex-shrink: 0;
+        }
+        .video-volume__slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(155,184,225,0.25);
+            outline: none;
+            cursor: pointer;
+        }
+        .video-volume__slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--muted);
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 0 0 2px rgba(155,184,225,0.2);
+            transition: transform 0.15s;
+        }
+        .video-volume__slider::-webkit-slider-thumb:hover { transform: scale(1.12); }
+        .video-volume__slider::-moz-range-thumb {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--muted);
+            border: 2px solid rgba(255,255,255,0.9);
+            cursor: pointer;
+        }
+        .video-volume__slider::-moz-range-track {
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(155,184,225,0.25);
+        }
+        .device-shell.is-video-active .video-play-btn { display: flex; }
+        .device-shell img,
+        .device-shell video {
+            width: 100%; height: 100%; object-fit: cover;
+            border-radius: 0.75rem; display: block;
+            background: var(--bg);
+        }
+        .device-shell video { display: none; background: var(--bg); }
+        #device-col-phone { display: none; }
+        #device-stage.has-phone #device-col-phone { display: flex; }
+        .device-arrow {
+            flex-shrink: 0; width: 2.4rem; height: 2.4rem;
+            border: 1px solid var(--line); border-radius: 0.45rem;
+            background: rgba(0,2,9,0.75); color: var(--text);
+            cursor: pointer; font-size: 1.2rem; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.25s, background 0.25s;
+        }
+        .device-arrow:hover { border-color: var(--muted); background: rgba(155,184,225,0.12); }
+        .device-dots {
+            display: flex; justify-content: center; gap: 0.35rem;
+            margin-top: 0.65rem;
+        }
+        .device-dots button {
+            width: 5px; height: 5px; border-radius: 50%; border: none; padding: 0;
+            background: rgba(155,184,225,0.25); cursor: pointer; transition: 0.25s;
+        }
+        .device-dots button.on { background: var(--muted); transform: scale(1.35); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        #bg-canvas {
+            position: fixed; inset: 0; z-index: 0;
+            pointer-events: none;
+        }
+        #fx-canvas {
+            position: fixed; inset: 0; z-index: 1;
+            pointer-events: none;
+        }
+
+        .demo-tag {
+            position: fixed; bottom: 1rem; left: 1rem; z-index: 200;
+            font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--muted); border: 1px solid var(--line); padding: 0.4rem 0.65rem;
+            background: rgba(0,2,9,0.85);
+        }
+        .demo-tag a { color: #fff; text-decoration: none; margin-left: 0.5em; opacity: 0.5; }
+
+        .header-logo {
+            position: fixed; top: 2.8rem; left: 2.8rem; z-index: 80;
+            display: flex; align-items: center; gap: 1rem; text-decoration: none; color: var(--text);
+        }
+        @media (min-width:1024px) { .header-logo { left: 6.4rem; top: 4.7rem; } }
+        .header-logo img { height: 3.2rem; width: auto; opacity: 0; transform: scale(0.9) rotate(-12deg); transition: transform 1.4s cubic-bezier(0.14,1,0.34,1), opacity 0.6s; }
+        .header-logo--visible img { opacity: 1; transform: none; }
+        .header-logo span { font-size: 11px; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; opacity: 0; transition: opacity 0.6s 0.2s; }
+        .header-logo--visible span { opacity: 1; }
+
+        .header-actions {
+            position: fixed; top: 3.2rem; right: 2.8rem; z-index: 80;
+            display: flex; align-items: center; gap: 0.5rem;
+            opacity: 0; transition: opacity 0.6s 0.3s;
+        }
+        @media (min-width:1024px) { .header-actions { right: 6.4rem; top: 5rem; } }
+        .header-actions--visible { opacity: 1; }
+        .header-link {
+            font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+            color: var(--text); text-decoration: none; border: 1px solid var(--line);
+            padding: 0.55rem 1rem; white-space: nowrap;
+            transition: border-color 0.3s;
+        }
+        .header-link:hover { border-color: var(--muted); }
+
+        .scrollbar { display: none; position: fixed; right: 6.4rem; top: 50%; transform: translateY(-50%); width: 2px; height: 16rem; z-index: 50; }
+        @media (min-width:768px) { .scrollbar { display: block; } }
+        .scrollbar__track { position: absolute; inset: 0; background: rgba(155,184,225,0.25); }
+        .scrollbar__thumb { position: absolute; top: 0; left: 0; right: 0; height: 3.2rem; background: #e3f4ff; }
+
+        #scroll-track { height: 500vh; position: relative; z-index: 1; }
+        #pin-viewport { height: 100vh; width: 100%; overflow: hidden; position: relative; }
+
+        .panel {
+            position: absolute; inset: 0;
+            display: grid; grid-template-columns: repeat(12, 1fr);
+            padding: 2.4rem 2.8rem;
+            visibility: hidden; opacity: 0; pointer-events: none;
+        }
+        .panel.is-active { visibility: visible; opacity: 1; pointer-events: auto; }
+        @media (min-width:1024px) { .panel { padding: 4.8rem 6.4rem; } }
+
+        .section-id {
+            position: absolute; left: 2.8rem; bottom: 2.4rem;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+        }
+        @media (min-width:1024px) { .section-id { left: 6.4rem; bottom: 4.8rem; } }
+        .section-id span {
+            background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        #panel-0 { align-items: stretch; padding-bottom: 2.4rem; }
+        @media (min-width:768px) { #panel-0 { padding-bottom: 4.8rem; } }
+        #panel-0 .triple-title p:nth-child(1) { color: rgba(238,238,238,0.48); }
+        #panel-0 .triple-title p:nth-child(2) { color: rgba(238,238,238,0.78); }
+        #panel-0 .triple-title p:nth-child(3) { color: #ffffff; }
+        .hero-tagline-box {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4em;
+            margin-top: 1.5rem;
+            padding: 0.7rem 1.05rem;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 0.4rem;
+            background: rgba(255,255,255,0.04);
+            max-width: fit-content;
+        }
+        .hero-tagline__dim {
+            font-size: clamp(0.78rem, 1vw, 0.92rem);
+            font-weight: 300;
+            color: rgba(238,238,238,0.38);
+        }
+        .hero-tagline__hi {
+            font-size: clamp(0.78rem, 1vw, 0.92rem);
+            font-weight: 500;
+            color: rgba(255,255,255,0.92);
+            letter-spacing: 0.01em;
+        }
+        .hero-scroll {
+            position: absolute; right: 2.8rem; bottom: 2.4rem;
+            display: flex; align-items: center; gap: 1rem; z-index: 2;
+            background: none; border: none; color: var(--text); cursor: pointer;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+            max-width: 9rem; text-align: right; line-height: 1.4;
+        }
+        @media (min-width:1024px) { .hero-scroll { right: 6.4rem; bottom: 4.8rem; } }
+        @media (max-width:767px) { .hero-scroll { display: none; } }
+        .hero-scroll__line { width: 1px; height: 2.4rem; background: linear-gradient(180deg, var(--grad-a), var(--grad-b)); position: relative; overflow: hidden; }
+        .hero-scroll__line::after { content: ''; position: absolute; inset: 0; background: var(--bg); animation: line-reveal 2s linear infinite; }
+        @keyframes line-reveal { 0%,12% { clip-path: inset(0 0 100% 0); } 30%,100% { clip-path: inset(0 0 0 0); } }
+
+        #panel-1, #panel-2, #panel-3 { align-items: stretch; }
+        .stack-title p + p { margin-top: 0.15em; }
+        @media (min-width:1024px) {
+            .stack-title p:nth-child(1) { margin-left: -0.5rem; }
+            .stack-title p:nth-child(2) { margin-left: 1rem; }
+        }
+        .panel-copy { margin-top: 1.25rem; }
+        .triple-title p + p { margin-top: 0.1em; }
+        @media (min-width:1024px) {
+            .triple-title p:nth-child(1) { margin-left: 0; }
+            .triple-title p:nth-child(2) { margin-left: 2.5rem; }
+            .triple-title p:nth-child(3) { margin-left: 1rem; }
+        }
+        .panel-copy-right { gap: 1.25rem; margin-top: 1rem; }
+        @media (min-width:1024px) { .panel-copy-right { margin-top: 0; } }
+        .btn { min-width: 14rem; height: 2.9rem; font-size: 9px; }
+        @media (min-width:1024px) {
+            .engine-dual p:first-child { margin-left: 0; }
+            .engine-dual p:last-child { margin-left: 0.5rem; margin-top: 0.15em; }
+            .engine-dual p { white-space: nowrap; }
+        }
+        .stat-row { display: flex; gap: 1.25rem; margin-top: 1.25rem; flex-wrap: wrap; }
+        .stat-row .val { font-size: 1rem; font-weight: 700; }
+        .stat-row .lbl { font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(238,238,238,0.35); margin-top: 0.2rem; }
+
+        /* 4. sayfa — engine metinleri büyük, alana uyumlu */
+        #panel-3 .panel-inner {
+            max-width: min(44vw, 36rem);
+        }
+        @media (min-width:1024px) {
+            #panel-3 .engine-dual {
+                font-size: clamp(2.1rem, 4.8vw, 4.2rem);
+                line-height: 1.02;
+            }
+            #panel-3 .engine-dual p:last-child {
+                margin-left: 1.25rem;
+                margin-top: 0.2em;
+            }
+            #panel-3 .panel-copy {
+                font-size: clamp(0.92rem, 1.25vw, 1.08rem);
+                max-width: 30rem;
+                line-height: 1.7;
+            }
+            #panel-3 .stat-row {
+                gap: 2.25rem;
+                margin-top: 2rem;
+            }
+            #panel-3 .stat-row .val {
+                font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+            }
+            #panel-3 .stat-row .lbl {
+                font-size: 9px;
+                letter-spacing: 0.32em;
+                margin-top: 0.35rem;
+            }
+        }
+
+        .feat-carousel {
+            position: fixed; bottom: 18rem; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: row; align-items: center; gap: 0.75rem;
+            pointer-events: none; z-index: 10; opacity: 0;
+        }
+        @media (min-width:1024px) {
+            .feat-carousel {
+                bottom: 5.8rem; left: 6.4rem; right: auto;
+                transform: none;
+            }
+        }
+        #feat-items {
+            position: relative;
+            width: min(14rem, 42vw);
+            min-height: 4.2rem;
+            flex-shrink: 0;
+        }
+        .feat-item {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            text-align: center; opacity: 0; transition: opacity 0.45s;
+            pointer-events: none;
+        }
+        @media (min-width:1024px) { .feat-item { text-align: left; } }
+        .feat-item.show { opacity: 1; }
+        .feat-item__tag { color: var(--accent); font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; margin-top: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+        .feat-nav {
+            display: flex; gap: 0.4rem; pointer-events: auto;
+            flex-shrink: 0;
+        }
+        .feat-nav button {
+            width: 3rem; height: 3.2rem; background: none; border: 1px solid var(--line);
+            border-radius: 0.5rem; color: var(--text); cursor: pointer;
+        }
+
+        #panel-4 { align-items: stretch; justify-content: center; }
+        .panel-inner--footer {
+            grid-column: 1 / -1 !important;
+            width: 100%;
+            max-width: 100% !important;
+            max-height: calc(100vh - 7rem);
+            padding-top: 4.5rem;
+            padding-bottom: 3rem;
+            padding-left: var(--page-pad);
+            padding-right: var(--page-pad);
+            overflow-y: auto;
+            overflow-x: hidden;
+            align-items: center;
+            text-align: center;
+            margin: 0 auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(155,184,225,0.3) transparent;
+        }
+        @media (min-width:1024px) {
+            .panel-inner.panel-inner--footer {
+                grid-column: 1 / -1 !important;
+                max-width: 100% !important;
+                padding-top: 5rem;
+                max-height: calc(100vh - 8rem);
+            }
+        }
+        #panel-4 .section-id {
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .footer-title { margin-bottom: 1rem; font-size: clamp(1.15rem, 2.6vw, 1.85rem); font-weight: 300; line-height: 1.15; z-index: 2; max-width: 90vw; }
+        .footer-title .dim { opacity: 0.25; font-style: italic; display: block; margin-top: 0.2em; }
+        .footer-cta { margin-bottom: 1.5rem; }
+        .specs-block {
+            width: 100%; max-width: 52rem;
+            text-align: left;
+            margin: 0 auto 1.25rem;
+        }
+        .specs-head { margin-bottom: 1rem; text-align: center; }
+        .specs-head h3 { font-size: clamp(1rem, 1.8vw, 1.35rem); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: -0.02em; }
+        .specs-head p { font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(238,238,238,0.35); margin-top: 0.35rem; font-family: 'JetBrains Mono', monospace; }
+        .specs-grid {
+            display: grid; gap: 1.25rem 2rem;
+        }
+        @media (min-width:768px) { .specs-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem 3rem; } }
+        .specs-col h4 {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent); font-size: 9px; font-weight: 700;
+            letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 0.65rem;
+        }
+        .spec-item {
+            padding: 0.45rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 10px; color: rgba(238,238,238,0.45);
+            display: flex; justify-content: space-between; gap: 0.75rem;
+        }
+        .spec-item .spec-label { color: var(--text); font-weight: 600; flex-shrink: 0; }
+        .spec-tags {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.65rem 1.25rem;
+            font-size: 8px; font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.22em; text-transform: uppercase;
+            color: rgba(238,238,238,0.28);
+            margin-bottom: 1.25rem;
+        }
+        .footer-legal {
+            width: 100%; max-width: 36rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 1.25rem;
+            text-align: center;
+        }
+        .footer-privacy {
+            font-size: 9px; line-height: 1.75; letter-spacing: 0.12em;
+            text-transform: uppercase; color: rgba(238,238,238,0.38);
+            margin-bottom: 0.75rem;
+        }
+        .footer-email {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: rgba(238,238,238,0.55);
+            text-decoration: underline; text-decoration-color: rgba(255,255,255,0.12);
+            margin-bottom: 1rem;
+        }
+        .footer-email:hover { color: var(--text); }
+        .footer-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+        .footer-social__link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 50%;
+            color: rgba(238,238,238,0.55);
+            text-decoration: none;
+            transition: color 0.25s, border-color 0.25s, background 0.25s;
+        }
+        .footer-social__link svg {
+            width: 1.05rem;
+            height: 1.05rem;
+            fill: currentColor;
+        }
+        .footer-social__link:hover {
+            color: var(--text);
+            border-color: rgba(255,255,255,0.28);
+            background: rgba(255,255,255,0.04);
+        }
+        .footer-meta {
+            font-size: 8px; font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.35em; text-transform: uppercase;
+            color: rgba(238,238,238,0.2);
+        }
+        .footer-meta p + p { margin-top: 0.35rem; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 0 1.5rem; color: var(--text); text-decoration: none; cursor: pointer;
+            border: 1px solid; border-image: linear-gradient(90deg, var(--grad-a), var(--grad-b)) 1;
+            background: transparent; transition: opacity 0.3s;
+            font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+        }
+        .btn--sm { min-width: auto; padding: 0 1.5rem; height: 2.7rem; font-size: 8px; }
+        .btn:hover { opacity: 0.7; }
+        .panel-cta { position: absolute; right: 2.8rem; bottom: 3rem; z-index: 2; }
+        @media (min-width:1024px) { .panel-cta { display: none; } }
+
+        .split-char { display: inline-block; opacity: 0; transform: translateY(110%); }
+        .nav-dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 90; }
+        .nav-dots button { width: 6px; height: 6px; border-radius: 50%; border: none; background: rgba(155,184,225,0.25); cursor: pointer; padding: 0; transition: 0.3s; }
+        .nav-dots button.on { background: var(--muted); transform: scale(1.4); }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <canvas id="fx-canvas" aria-hidden="true"></canvas>
+    <p class="demo-tag">Fuse Void × Hashgraph <a href="index.html">← mevcut site</a></p>
+
+    <a href="#" class="header-logo header-logo--visible">
+        <img src="FuseVoid_Export_favicon (3).png" alt="Fuse Void">
+        <span>Fuse Void</span>
+    </a>
+    <nav class="header-actions header-actions--visible" aria-label="Site links">
+        <a href="#" class="header-link" id="link-app-store">App Store</a>
+        <a href="mailto:fusevoidmusic@gmail.com" class="header-link">Support</a>
+    </nav>
+
+    <div class="scrollbar"><div class="scrollbar__track"></div><div class="scrollbar__thumb" id="scroll-thumb"></div></div>
+    <div class="nav-dots" id="nav-dots"></div>
+
+    <div id="device-stage">
+        <div class="device-stage__inner">
+            <button type="button" class="device-arrow" id="dev-prev" aria-label="Önceki">‹</button>
+            <div class="device-duo device-duo--solo" id="device-duo">
+                <div class="device-col device-col--ipad">
+                    <span class="device-label">iPad</span>
+                    <div class="device-viewport" id="device-viewport-ipad">
+                        <div class="device-shell device-shell--ipad" id="device-shell-ipad">
+                            <video id="dev-ipad-video" playsinline muted loop preload="metadata" poster="1FuseVoidipad.png"></video>
+                            <img id="dev-ipad-img" src="1FuseVoidipad.png" alt="Fuse Void iPad">
+                            <div class="video-controls">
+                                <button type="button" class="video-play-btn" id="video-play-toggle" aria-label="Video oynat">▶</button>
+                                <div class="video-volume">
+                                    <span class="video-volume__icon" id="video-volume-icon" aria-hidden="true">🔇</span>
+                                    <input type="range" class="video-volume__slider" id="video-volume" min="0" max="100" value="0" aria-label="Ses seviyesi">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="device-col device-col--phone" id="device-col-phone">
+                    <span class="device-label">iPhone</span>
+                    <div class="device-viewport" id="device-viewport-phone">
+                        <div class="device-shell device-shell--phone">
+                            <img id="dev-phone-img" src="5iphone.png" alt="Fuse Void iPhone">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="device-arrow" id="dev-next" aria-label="Sonraki">›</button>
+        </div>
+        <div class="device-dots" id="device-dots"></div>
+    </div>
+
+    <div id="scroll-track">
+        <div id="pin-viewport">
+            <section class="panel" id="panel-0">
+                <div class="panel-inner">
+                    <div class="triple-title h1 split-block">
+                        <p>Make powerful</p>
+                        <p>beats in</p>
+                        <p>seconds.</p>
+                    </div>
+                    <div class="hero-tagline-box split-block">
+                        <span class="hero-tagline__hi">Just groove.</span>
+                    </div>
+                </div>
+                <button class="hero-scroll" type="button" id="scroll-btn">
+                    <span>Scroll down to discover more</span><span class="hero-scroll__line"></span>
+                </button>
+            </section>
+
+            <section class="panel" id="panel-1">
+                <div class="panel-inner">
+                    <div class="stack-title h1 split-block">
+                        <p>Designed for</p>
+                        <p>real-time creativity</p>
+                    </div>
+                    <div class="panel-copy body-copy split-block">
+                        <p>Everything is instant. Fuse Void MK1 is playable. Micro timing, chaos FX, 11-channel mixer — all touch-first.</p>
+                    </div>
+                </div>
+                <div class="panel-cta"><a href="#" class="btn btn--sm">App Store</a></div>
+                <div class="section-id"><span>//01</span> Experience</div>
+            </section>
+
+            <section class="panel" id="panel-2">
+                <div class="panel-inner panel-inner--wide">
+                    <div class="triple-title h1 split-block">
+                        <p>Shape your rhythm</p>
+                        <p>with micro</p>
+                        <p>timing</p>
+                    </div>
+                    <div class="panel-copy-right">
+                        <p class="body-copy split-block">Precision groove offset and swing control. Master the Kaos-style XY pad — lo-fi crush, sidechain pump, filtered delays.</p>
+                        <a href="index.html#features" class="btn">Explore features</a>
+                    </div>
+                </div>
+                <div class="panel-cta"><button class="btn btn--sm" type="button">Read more</button></div>
+                <div class="section-id"><span>//02</span> Features</div>
+            </section>
+
+            <section class="panel" id="panel-3">
+                <div class="panel-inner">
+                    <div class="engine-dual h1 split-block">
+                        <p>113 Pro</p>
+                        <p>Samples</p>
+                    </div>
+                    <div class="panel-copy body-copy split-block" style="margin-top:1rem">
+                        <p>High-fidelity one-shots for Silicon. 126 pattern slots, A–H kit chaining, MIDI export. Zero latency.</p>
+                    </div>
+                    <div class="stat-row mono">
+                        <div><p class="val">M1-M5</p><p class="lbl">Silicon Native</p></div>
+                        <div><p class="val">17.6+</p><p class="lbl">iOS Required</p></div>
+                        <div><p class="val">0ms</p><p class="lbl">Core Latency</p></div>
+                    </div>
+                </div>
+                <div class="panel-cta"><button class="btn btn--sm" type="button">Full specs</button></div>
+                <div class="section-id"><span>//03</span> Engine</div>
+            </section>
+
+            <section class="panel" id="panel-4">
+                <div class="panel-inner panel-inner--footer">
+                    <div class="footer-title">
+                        <p class="split-text">Built for speed.</p>
+                        <p class="split-text dim">Built for you.</p>
+                    </div>
+                    <div class="footer-cta">
+                        <a href="#" class="btn btn--sm" id="link-app-store-footer">Download on App Store</a>
+                    </div>
+
+                    <div class="specs-block">
+                        <div class="specs-head">
+                            <h3>Fuse Void MK1 Specs</h3>
+                            <p>Full Technical System Architecture</p>
+                        </div>
+                        <div class="specs-grid">
+                            <div class="specs-col">
+                                <h4>/ Core Sequencing</h4>
+                                <div class="spec-item"><span class="spec-label">Sequencer</span><span>16-Step High Precision Engine</span></div>
+                                <div class="spec-item"><span class="spec-label">Micro Timing</span><span>Per-step groove offset control</span></div>
+                                <div class="spec-item"><span class="spec-label">Patterns</span><span>126 save/load slots</span></div>
+                                <div class="spec-item"><span class="spec-label">Chaining</span><span>A–H Bar-aligned pattern linking</span></div>
+                                <div class="spec-item"><span class="spec-label">Switching</span><span>Bar-aligned Quantized Transitions</span></div>
+                                <div class="spec-item"><span class="spec-label">Assignment</span><span>Per-step sample / sound assignment</span></div>
+                            </div>
+                            <div class="specs-col">
+                                <h4>/ Audio &amp; Performance</h4>
+                                <div class="spec-item"><span class="spec-label">Samples</span><span>113 One-shot High Quality Library</span></div>
+                                <div class="spec-item"><span class="spec-label">Mixer</span><span>11-Channels with Per-Channel Mute</span></div>
+                                <div class="spec-item"><span class="spec-label">Chaos FX</span><span>XY Kaos Pad with Reset behavior</span></div>
+                                <div class="spec-item"><span class="spec-label">Dynamics</span><span>Swing control &amp; Accent system</span></div>
+                                <div class="spec-item"><span class="spec-label">Matrix</span><span>Full pattern multi-track editor</span></div>
+                                <div class="spec-item"><span class="spec-label">Integration</span><span>MIDI Export &amp; Real-time REC</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="spec-tags">
+                        <span>No Menu Diving</span>
+                        <span>Zero Latency</span>
+                        <span>Offline First</span>
+                        <span>Touch Optimized</span>
+                    </div>
+
+                    <div class="footer-legal">
+                        <p class="footer-privacy">Fuse Void is an offline-first engine. We do not use cookies. We do not track you. Your creativity is yours alone.</p>
+                        <a href="mailto:fusevoidmusic@gmail.com" class="footer-email">fusevoidmusic@gmail.com</a>
+                        <div class="footer-social">
+                            <a href="#" class="footer-social__link" id="link-instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </a>
+                            <a href="#" class="footer-social__link" id="link-youtube" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            </a>
+                        </div>
+                        <div class="footer-meta">
+                            <p>Designed on MacBook M1 // 2026</p>
+                            <p>© FUSE VOID MUSIC ENGINE</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-id"><span>//04</span> Specs</div>
+            </section>
+        </div>
+    </div>
+
+    <div class="feat-carousel" id="feat-carousel">
+        <div id="feat-items"></div>
+        <nav class="feat-nav">
+            <button type="button" id="feat-prev">‹</button>
+            <button type="button" id="feat-next">›</button>
+        </nav>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* Link placeholders — URL'leri buradan güncelle */
+        const SITE_LINKS = {
+            appStore: '#',
+            instagram: '#',
+            youtube: '#',
+        };
+        document.getElementById('link-app-store').href = SITE_LINKS.appStore;
+        document.getElementById('link-app-store-footer').href = SITE_LINKS.appStore;
+        document.getElementById('link-instagram').href = SITE_LINKS.instagram;
+        document.getElementById('link-youtube').href = SITE_LINKS.youtube;
+
+        const FEATURES = [
+            { title: 'Micro Timing', tag: '// SEQUENCER' },
+            { title: 'Chaos FX', tag: '// KAOS PAD' },
+            { title: '11-Channel Mixer', tag: '// MIX_SYSTEM' },
+            { title: '126 Patterns', tag: '// WORKFLOW' },
+        ];
+        let featIdx = 0;
+        const featWrap = document.getElementById('feat-items');
+        const featCarousel = document.getElementById('feat-carousel');
+        FEATURES.forEach((f, i) => {
+            const d = document.createElement('div');
+            d.className = 'feat-item' + (i === 0 ? ' show' : '');
+            d.innerHTML = `<p class="h2">${f.title}</p><p class="feat-item__tag">${f.tag}</p>`;
+            featWrap.appendChild(d);
+        });
+        function showFeat(i) {
+            featIdx = (i + FEATURES.length) % FEATURES.length;
+            [...featWrap.children].forEach((c, j) => c.classList.toggle('show', j === featIdx));
+        }
+        document.getElementById('feat-prev').onclick = () => showFeat(featIdx - 1);
+        document.getElementById('feat-next').onclick = () => showFeat(featIdx + 1);
+
+        function splitEl(el) {
+            if (el.dataset.split) return;
+            el.dataset.split = '1';
+            el.innerHTML = [...el.textContent].map(c =>
+                c === ' ' ? ' ' : `<span class="split-char">${c}</span>`
+            ).join('');
+        }
+        document.querySelectorAll('.split-text').forEach(splitEl);
+        document.querySelectorAll('.split-block').forEach(el => el.querySelectorAll('p').forEach(splitEl));
+
+        const panels = [...document.querySelectorAll('.panel')];
+        const PANEL_COUNT = panels.length;
+        const deviceStage = document.getElementById('device-stage');
+        const deviceDuo = document.getElementById('device-duo');
+        const deviceViewportIpad = document.getElementById('device-viewport-ipad');
+        const deviceViewportPhone = document.getElementById('device-viewport-phone');
+        const devIpad = document.getElementById('dev-ipad-img');
+        const devIpadVideo = document.getElementById('dev-ipad-video');
+        const devIpadShell = document.getElementById('device-shell-ipad');
+        const videoPlayBtn = document.getElementById('video-play-toggle');
+        const videoVolume = document.getElementById('video-volume');
+        const videoVolumeIcon = document.getElementById('video-volume-icon');
+        const devPhone = document.getElementById('dev-phone-img');
+        const deviceDotsWrap = document.getElementById('device-dots');
+
+        const IPAD_SLIDES = [
+            '1FuseVoidipad.png',
+            '2 FuseVoid ipad.png',
+            '5 FuseVoid ipad.png',
+            '6 FuseVoid ipad.png',
+            '7 FuseVoid ipad.png',
+            '8 FuseVoid ipad.png',
+        ];
+
+        const PHONE_SLIDES = [
+            '5iphone.png', '6iphone.png', '1iphone.png', '4iphone.png', '7iphone.png',
+        ];
+
+        const DEVICE_GALLERY = [
+            { videoOnly: true },
+            { ipadOnly: true, ipad: IPAD_SLIDES },
+            { phoneOnly: true, phone: PHONE_SLIDES },
+            { noDevice: true },
+            { noDevice: true },
+        ];
+
+        let scrollPanel = 0;
+        let slideIdx = 0;
+        let autoTimer = null;
+        let videoFallbackTimer = null;
+        const AUTO_MS = 3200;
+        let galleryPanel = -1;
+
+        function slideCount(g) {
+            if (g.noDevice || g.videoOnly) return 0;
+            if (g.phoneOnly) return g.phone.length;
+            if (g.ipadOnly) return g.ipad.length;
+            return g.ipad?.length || 0;
+        }
+
+        function setDeviceMode(g) {
+            deviceStage.classList.remove('is-video-only', 'is-ipad-only', 'phone-only', 'has-phone');
+            if (g.videoOnly) deviceStage.classList.add('is-video-only');
+            else if (g.ipadOnly) deviceStage.classList.add('is-ipad-only');
+            else if (g.phoneOnly) deviceStage.classList.add('phone-only');
+        }
+
+        function clearAutoTimers() {
+            clearInterval(autoTimer);
+            clearTimeout(videoFallbackTimer);
+            autoTimer = null;
+            videoFallbackTimer = null;
+            devIpadVideo.onended = null;
+        }
+
+        function updateVideoPlayBtn() {
+            const playing = !devIpadVideo.paused && !devIpadVideo.ended;
+            videoPlayBtn.textContent = playing ? '❚❚' : '▶';
+            videoPlayBtn.setAttribute('aria-label', playing ? 'Video durdur' : 'Video oynat');
+        }
+
+        function updateVolumeUI(val) {
+            const pct = Math.round(val);
+            videoVolumeIcon.textContent = pct === 0 ? '🔇' : pct < 35 ? '🔈' : pct < 70 ? '🔉' : '🔊';
+        }
+
+        function applyVolume(val) {
+            const pct = Math.max(0, Math.min(100, val));
+            const v = pct / 100;
+            devIpadVideo.volume = v;
+            devIpadVideo.muted = v === 0;
+            videoVolume.value = pct;
+            updateVolumeUI(pct);
+        }
+
+        function showVideoOnly() {
+            devIpad.style.display = 'none';
+            devIpadVideo.style.display = 'block';
+            devIpadShell.classList.add('is-video-active');
+            const src = 'fuse void video .mp4';
+            if (devIpadVideo.getAttribute('data-src') !== src) {
+                devIpadVideo.src = src;
+                devIpadVideo.setAttribute('data-src', src);
+            }
+            applyVolume(+videoVolume.value || 0);
+            devIpadVideo.pause();
+            updateVideoPlayBtn();
+        }
+
+        function hideVideo() {
+            devIpadVideo.pause();
+            devIpadVideo.style.display = 'none';
+            devIpadShell.classList.remove('is-video-active');
+        }
+
+        videoPlayBtn.addEventListener('click', () => {
+            if (devIpadVideo.style.display === 'none') return;
+            if (devIpadVideo.paused) devIpadVideo.play().catch(() => {});
+            else devIpadVideo.pause();
+            updateVideoPlayBtn();
+        });
+        videoVolume.addEventListener('input', (e) => applyVolume(+e.target.value));
+        videoVolume.addEventListener('change', (e) => applyVolume(+e.target.value));
+        updateVolumeUI(0);
+        devIpadVideo.addEventListener('play', updateVideoPlayBtn);
+        devIpadVideo.addEventListener('pause', updateVideoPlayBtn);
+        devIpadVideo.addEventListener('ended', updateVideoPlayBtn);
+
+        function renderDeviceDots(count) {
+            deviceDotsWrap.innerHTML = '';
+            deviceDotsWrap.style.display = count > 1 ? 'flex' : 'none';
+            for (let i = 0; i < count; i++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.addEventListener('click', () => goSlide(i));
+                deviceDotsWrap.appendChild(b);
+            }
+        }
+
+        function updateDeviceDots() {
+            [...deviceDotsWrap.children].forEach((d, i) => d.classList.toggle('on', i === slideIdx));
+        }
+
+        function applySlide(g, idx) {
+            setDeviceMode(g);
+            if (g.noDevice) return;
+            if (g.videoOnly) {
+                deviceDuo.classList.add('device-duo--solo');
+                showVideoOnly();
+                return;
+            }
+            hideVideo();
+            if (g.ipadOnly) {
+                deviceDuo.classList.add('device-duo--solo');
+                devIpad.style.display = 'block';
+                devIpad.src = g.ipad[idx];
+                updateDeviceDots();
+                return;
+            }
+            if (g.phoneOnly) {
+                devIpad.style.display = 'none';
+                deviceDuo.classList.add('device-duo--solo');
+                devPhone.src = g.phone[idx];
+                updateDeviceDots();
+                return;
+            }
+        }
+
+        function goSlide(idx, animate = true) {
+            const g = DEVICE_GALLERY[galleryPanel];
+            if (!g || g.noDevice || g.videoOnly) return;
+            const total = slideCount(g);
+            if (!total) return;
+            slideIdx = ((idx % total) + total) % total;
+            const targets = g.phoneOnly ? [deviceViewportPhone] : [deviceViewportIpad];
+            if (!animate) {
+                applySlide(g, slideIdx);
+                return;
+            }
+            gsap.to(targets, {
+                opacity: 0, x: -10, duration: 0.2, ease: 'power2.in',
+                onComplete: () => {
+                    applySlide(g, slideIdx);
+                    gsap.fromTo(targets, { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' });
+                    restartAuto();
+                }
+            });
+        }
+
+        function stepSlide(dir) { goSlide(slideIdx + dir, true); }
+
+        function restartAuto() {
+            clearAutoTimers();
+            const g = DEVICE_GALLERY[galleryPanel];
+            if (!g || g.noDevice || g.videoOnly) return;
+            autoTimer = setInterval(() => stepSlide(1), AUTO_MS);
+        }
+
+        function stopAuto() {
+            clearAutoTimers();
+            devIpadVideo.pause();
+        }
+
+        function bindGallery(panelIdx) {
+            const g = DEVICE_GALLERY[panelIdx];
+            if (panelIdx === galleryPanel) {
+                if (g.videoOnly && devIpadVideo.style.display === 'none') showVideoOnly();
+                return;
+            }
+            galleryPanel = panelIdx;
+            slideIdx = 0;
+            renderDeviceDots(slideCount(g));
+            gsap.set([deviceViewportIpad, deviceViewportPhone], { opacity: 1, x: 0 });
+            applySlide(g, 0);
+            if (!g.noDevice && !g.videoOnly) restartAuto();
+            else if (g.videoOnly) showVideoOnly();
+        }
+
+        document.getElementById('dev-prev').onclick = () => stepSlide(-1);
+        document.getElementById('dev-next').onclick = () => stepSlide(1);
+
+        const dotsWrap = document.getElementById('nav-dots');
+        panels.forEach((_, i) => {
+            const b = document.createElement('button');
+            b.onclick = () => {
+                const st = ScrollTrigger.getById('main');
+                window.scrollTo({ top: (i / (PANEL_COUNT - 1)) * (st.end - st.start) + st.start, behavior: 'smooth' });
+            };
+            dotsWrap.appendChild(b);
+        });
+
+        function switchPanel(idx) {
+            if (idx === currentPanel) return;
+            panels.forEach((p, i) => {
+                gsap.killTweensOf(p);
+                gsap.killTweensOf(p.querySelectorAll('.split-char'));
+                p.classList.toggle('is-active', i === idx);
+                if (i !== idx) {
+                    gsap.set(p, { opacity: 0, visibility: 'hidden' });
+                    gsap.set(p.querySelectorAll('.split-char'), { opacity: 0, y: '110%' });
+                }
+            });
+            currentPanel = idx;
+            const panel = panels[idx];
+            panel.style.visibility = 'visible';
+            gsap.set(panel, { opacity: 1 });
+            gsap.fromTo(
+                panel.querySelectorAll('.split-char'),
+                { y: '110%', opacity: 0 },
+                { y: '0%', opacity: 1, duration: 0.75, stagger: 0.008, ease: 'power3.out' }
+            );
+        }
+
+        let currentPanel = -1;
+        let humanAlpha = 0;
+        let humanMode = 'off';
+        let humanScale = 0.55;
+        ScrollTrigger.create({
+            id: 'main',
+            trigger: '#scroll-track',
+            start: 'top top',
+            end: 'bottom bottom',
+            pin: '#pin-viewport',
+            scrub: 0.6,
+            snap: { snapTo: 1 / (PANEL_COUNT - 1), duration: { min: 0.25, max: 0.55 }, ease: 'power2.inOut' },
+            onUpdate(self) {
+                const p = self.progress;
+                const seg = 1 / (PANEL_COUNT - 1);
+                const idx = Math.min(PANEL_COUNT - 1, Math.round(p * (PANEL_COUNT - 1)));
+                scrollPanel = idx;
+                scrollProgress = p;
+                humanAlpha = idx === 1 ? 0.4 : idx === 2 ? 0.48 : idx === 3 ? 0.82 : idx === 4 ? 0.2 : 0;
+                humanMode = idx === 4 ? 'footer' : idx === 3 ? 'engine' : idx >= 1 && idx <= 2 ? 'side' : 'off';
+                humanScale = idx === 3 ? (innerWidth < 1024 ? 0.68 : 0.88) : idx === 2 ? 0.6 : idx === 1 ? 0.56 : 0.55;
+
+                const center = idx * seg;
+                const dist = Math.abs(p - center) / seg;
+                const stageOp = Math.max(0, 1 - dist * 0.92) * (idx >= 3 ? 0 : 1);
+                deviceStage.style.opacity = stageOp;
+                deviceStage.classList.toggle('is-live', stageOp > 0.35);
+                if (stageOp > 0.35) bindGallery(idx);
+                else stopAuto();
+
+                [...dotsWrap.children].forEach((d, i) => d.classList.toggle('on', i === idx));
+                document.getElementById('scroll-thumb').style.transform = `translateY(${p * 205}px)`;
+
+                const featOn = idx === 2;
+                gsap.to(featCarousel, { opacity: featOn ? 1 : 0, duration: 0.45, pointerEvents: featOn ? 'auto' : 'none' });
+
+                if (idx !== currentPanel) switchPanel(idx);
+            }
+        });
+        switchPanel(0);
+        bindGallery(0);
+        deviceStage.classList.add('is-live', 'is-video-only');
+        deviceStage.style.opacity = 1;
+        document.getElementById('scroll-btn').onclick = () => window.scrollBy({ top: innerHeight * 0.85, behavior: 'smooth' });
+
+        /* Sıvı arka plan + yüzen kayalar */
+        const bgCvs = document.getElementById('bg-canvas');
+        const bgFx = bgCvs.getContext('2d');
+        const fluidCvs = document.createElement('canvas');
+        const fluidFx = fluidCvs.getContext('2d');
+        let bgT = 0;
+        let scrollProgress = 0;
+
+        function buildRocks(n) {
+            return Array.from({ length: n }, () => {
+                const pts = [];
+                const sides = 5 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < sides; i++) {
+                    const a = (i / sides) * Math.PI * 2;
+                    const r = 0.55 + Math.random() * 0.45;
+                    pts.push({ a, r });
+                }
+                return {
+                    x: Math.random(),
+                    y: Math.random(),
+                    z: 0.3 + Math.random() * 0.7,
+                    vx: (Math.random() - 0.5) * 0.00008,
+                    vy: (Math.random() - 0.5) * 0.00006,
+                    rot: Math.random() * Math.PI * 2,
+                    rotV: (Math.random() - 0.5) * 0.0004,
+                    size: 28 + Math.random() * 72,
+                    pts,
+                    phase: Math.random() * Math.PI * 2,
+                };
+            });
+        }
+
+        let rocks = buildRocks(innerWidth < 768 ? 10 : 18);
+
+        function resizeBg() {
+            bgCvs.width = innerWidth * devicePixelRatio;
+            bgCvs.height = innerHeight * devicePixelRatio;
+            bgCvs.style.width = innerWidth + 'px';
+            bgCvs.style.height = innerHeight + 'px';
+            bgFx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+            fluidCvs.width = Math.max(160, Math.floor(innerWidth * 0.28));
+            fluidCvs.height = Math.max(90, Math.floor(innerHeight * 0.28));
+            rocks = buildRocks(innerWidth < 768 ? 10 : 18);
+        }
+
+        function drawFluid(t) {
+            const w = fluidCvs.width;
+            const h = fluidCvs.height;
+            const img = fluidFx.createImageData(w, h);
+            const d = img.data;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const nx = x / w;
+                    const ny = y / h;
+                    const wave =
+                        Math.sin(nx * 9 + t * 0.55) * 0.28 +
+                        Math.sin(ny * 7 - t * 0.42) * 0.26 +
+                        Math.sin((nx + ny) * 11 + t * 0.35) * 0.22 +
+                        Math.sin(Math.hypot(nx - 0.42, ny - 0.55) * 14 - t * 0.48) * 0.24;
+                    const caustic = Math.pow(Math.max(0, wave * 0.5 + 0.5), 1.6);
+                    const i = (y * w + x) * 4;
+                    d[i] = 8 + caustic * 38;
+                    d[i + 1] = 14 + caustic * 62;
+                    d[i + 2] = 32 + caustic * 88;
+                    d[i + 3] = 18 + caustic * 55;
+                }
+            }
+            fluidFx.putImageData(img, 0, 0);
+        }
+
+        function drawRock(r, t, parallax) {
+            const px = (r.x + Math.sin(t * 0.15 + r.phase) * 0.012) * innerWidth;
+            const py = (r.y + Math.cos(t * 0.12 + r.phase) * 0.01 + parallax * 0.06) * innerHeight;
+            const depth = r.z;
+            const sz = r.size * (0.45 + depth * 0.85);
+            r.x += r.vx;
+            r.y += r.vy;
+            r.rot += r.rotV;
+            if (r.x < -0.08) r.x = 1.08;
+            if (r.x > 1.08) r.x = -0.08;
+            if (r.y < -0.08) r.y = 1.08;
+            if (r.y > 1.08) r.y = -0.08;
+
+            bgFx.save();
+            bgFx.translate(px, py);
+            bgFx.rotate(r.rot + Math.sin(t * 0.2 + r.phase) * 0.08);
+            bgFx.beginPath();
+            r.pts.forEach((p, i) => {
+                const rad = p.r * sz;
+                const vx = Math.cos(p.a) * rad;
+                const vy = Math.sin(p.a) * rad;
+                if (i === 0) bgFx.moveTo(vx, vy);
+                else bgFx.lineTo(vx, vy);
+            });
+            bgFx.closePath();
+            const g = bgFx.createLinearGradient(-sz, -sz, sz, sz);
+            g.addColorStop(0, `rgba(4,8,18,${0.55 + depth * 0.35})`);
+            g.addColorStop(0.5, `rgba(8,16,32,${0.65 + depth * 0.3})`);
+            g.addColorStop(1, `rgba(2,4,10,${0.75 + depth * 0.2})`);
+            bgFx.fillStyle = g;
+            bgFx.fill();
+            bgFx.strokeStyle = `rgba(120,160,210,${0.08 + depth * 0.12})`;
+            bgFx.lineWidth = 1.2;
+            bgFx.stroke();
+            bgFx.restore();
+        }
+
+        function bgFrame() {
+            requestAnimationFrame(bgFrame);
+            bgT += 0.016;
+            drawFluid(bgT);
+            bgFx.clearRect(0, 0, innerWidth, innerHeight);
+
+            const base = bgFx.createLinearGradient(0, 0, innerWidth * 0.3, innerHeight);
+            base.addColorStop(0, '#000209');
+            base.addColorStop(0.45, '#010612');
+            base.addColorStop(1, '#020818');
+            bgFx.fillStyle = base;
+            bgFx.fillRect(0, 0, innerWidth, innerHeight);
+
+            bgFx.save();
+            bgFx.globalCompositeOperation = 'screen';
+            bgFx.globalAlpha = 0.55;
+            bgFx.filter = 'blur(18px)';
+            bgFx.drawImage(fluidCvs, 0, 0, innerWidth, innerHeight);
+            bgFx.restore();
+
+            const blobs = [
+                { x: 0.22, y: 0.38, r: 0.42, ph: 0 },
+                { x: 0.68, y: 0.55, r: 0.38, ph: 1.2 },
+                { x: 0.48, y: 0.72, r: 0.32, ph: 2.4 },
+            ];
+            blobs.forEach(b => {
+                const bx = (b.x + Math.sin(bgT * 0.08 + b.ph) * 0.04) * innerWidth;
+                const by = (b.y + Math.cos(bgT * 0.06 + b.ph) * 0.03 + scrollProgress * 0.08) * innerHeight;
+                const br = b.r * Math.min(innerWidth, innerHeight);
+                const g = bgFx.createRadialGradient(bx, by, 0, bx, by, br);
+                g.addColorStop(0, 'rgba(46,90,140,0.14)');
+                g.addColorStop(0.55, 'rgba(20,45,80,0.06)');
+                g.addColorStop(1, 'rgba(0,2,9,0)');
+                bgFx.fillStyle = g;
+                bgFx.fillRect(0, 0, innerWidth, innerHeight);
+            });
+
+            rocks.forEach(r => drawRock(r, bgT, scrollProgress));
+
+            const vig = bgFx.createRadialGradient(
+                innerWidth * 0.5, innerHeight * 0.48, innerHeight * 0.2,
+                innerWidth * 0.5, innerHeight * 0.48, innerHeight * 0.85
+            );
+            vig.addColorStop(0, 'rgba(0,2,9,0)');
+            vig.addColorStop(1, 'rgba(0,2,9,0.72)');
+            bgFx.fillStyle = vig;
+            bgFx.fillRect(0, 0, innerWidth, innerHeight);
+        }
+
+        resizeBg();
+        bgFrame();
+
+        /* Toz insan — hafif, panel 2–3 */
+        const cvs = document.getElementById('fx-canvas');
+        const fx = cvs.getContext('2d');
+        let mx = innerWidth * 0.72, my = innerHeight * 0.5;
+        let swayT = 0;
+        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+        function buildHuman() {
+            const pts = [];
+            const add = (cx, cy, cz, rx, ry, rz, n) => {
+                for (let i = 0; i < n; i++) {
+                    pts.push({
+                        hx: cx + (Math.random() - 0.5) * rx,
+                        hy: cy + (Math.random() - 0.5) * ry,
+                        hz: cz + (Math.random() - 0.5) * rz,
+                        x: 0, y: 0, s: 0.7 + Math.random() * 1.1,
+                    });
+                }
+            };
+            add(0, -95, 0, 22, 26, 18, 50);
+            add(0, -35, 0, 38, 55, 22, 100);
+            add(-48, -40, 0, 14, 50, 12, 40);
+            add(48, -40, 0, 14, 50, 12, 40);
+            add(-18, 55, 0, 16, 65, 14, 45);
+            add(18, 55, 0, 16, 65, 14, 45);
+            add(-18, 120, 0, 14, 40, 12, 30);
+            add(18, 120, 0, 14, 40, 12, 30);
+            return pts;
+        }
+
+        const human = buildHuman();
+        let rotY = 0, rotX = 0.22;
+
+        function deviceStageWidth() {
+            const pad = innerWidth >= 1024 ? Math.min(innerWidth * 0.09, 102) : 28;
+            if (deviceStage.classList.contains('is-video-only')) {
+                return Math.min(innerWidth * 0.52 - pad, 880);
+            }
+            if (deviceStage.classList.contains('is-ipad-only')) {
+                return Math.min(innerWidth * 0.54 - pad, 900);
+            }
+            if (deviceStage.classList.contains('phone-only')) {
+                return Math.min(innerWidth * 0.44 - pad, 460);
+            }
+            return Math.min(innerWidth * 0.44 - pad, 520);
+        }
+
+        function fxAnchor(mode) {
+            const pad = innerWidth >= 1024 ? Math.min(innerWidth * 0.09, 102) : 28;
+            const split = innerWidth * 0.5;
+            const deviceCenterX = split + (innerWidth - split - pad) * 0.5;
+            if (mode === 'footer') {
+                return { x: innerWidth * 0.5, y: innerHeight * 0.74, scale: 0.38 };
+            }
+            if (mode === 'engine') {
+                return {
+                    x: innerWidth * (innerWidth < 1024 ? 0.5 : 0.64),
+                    y: innerHeight * 0.47,
+                    scale: humanScale,
+                };
+            }
+            if (mode === 'side') {
+                const textRight = pad + Math.min(innerWidth * 0.36, 448);
+                const deviceLeft = deviceCenterX - deviceStageWidth() * 0.5;
+                const gapCenter = (textRight + deviceLeft) * 0.5;
+                return {
+                    x: gapCenter,
+                    y: innerHeight * (innerWidth < 1024 ? 0.42 : 0.46),
+                    scale: humanScale,
+                };
+            }
+            return { x: deviceCenterX, y: innerHeight * 0.48, scale: 0.65 };
+        }
+
+        function projectHuman(p, cx, cy, scale, sway) {
+            const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+            const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+            let x1 = p.hx * cosY - p.hz * sinY;
+            let z1 = p.hx * sinY + p.hz * cosY;
+            let y1 = p.hy * cosX - z1 * sinX;
+            let z2 = p.hy * sinX + z1 * cosX;
+            const persp = 420 / (420 + z2);
+            return {
+                sx: cx + x1 * scale * persp + Math.sin(sway + p.hx * 0.03) * 2,
+                sy: cy + y1 * scale * persp + Math.cos(sway + p.hy * 0.03) * 2,
+                persp,
+            };
+        }
+
+        function resizeFx() {
+            cvs.width = innerWidth * devicePixelRatio;
+            cvs.height = innerHeight * devicePixelRatio;
+            cvs.style.width = innerWidth + 'px';
+            cvs.style.height = innerHeight + 'px';
+            fx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        }
+        resizeFx();
+        window.addEventListener('resize', () => { resizeBg(); resizeFx(); ScrollTrigger.refresh(); });
+
+        function frame() {
+            requestAnimationFrame(frame);
+            swayT += 0.016;
+            rotY += 0.0025;
+            fx.clearRect(0, 0, innerWidth, innerHeight);
+            if (humanAlpha < 0.02 || humanMode === 'off') return;
+
+            const { x: cx, y: cy, scale } = fxAnchor(humanMode);
+            human.forEach(p => {
+                const { sx, sy, persp } = projectHuman(p, cx, cy + Math.sin(swayT * 0.5) * 4, scale, swayT);
+                const dx = sx - mx, dy = sy - my;
+                const dist = Math.hypot(dx, dy);
+                let tx = sx, ty = sy;
+                if (dist < 120 && dist > 0) {
+                    const f = (1 - dist / 120) * 0.85;
+                    tx = sx + (dx / dist) * f * 48;
+                    ty = sy + (dy / dist) * f * 48;
+                }
+                p.x += (tx - p.x) * 0.12;
+                p.y += (ty - p.y) * 0.12;
+                const a = humanAlpha * (0.3 + persp * 0.55);
+                fx.fillStyle = `rgba(155,184,225,${Math.min(1, a)})`;
+                fx.beginPath();
+                fx.arc(p.x, p.y, p.s * persp * 0.85, 0, Math.PI * 2);
+                fx.fill();
+            });
+        }
+        frame();
+    </script>
+</body>
+</html>
