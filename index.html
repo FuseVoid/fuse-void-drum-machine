@@ -22,6 +22,7 @@
             --split-x: 50%;
             --right-cx: 75%;
             --font-display: 'Syne', system-ui, sans-serif;
+            --glyph-stroke: rgba(82, 62, 118, 0.78);
         }
         @media (min-width:1024px) {
             :root { --page-pad: 6.4rem; }
@@ -49,21 +50,30 @@
             font-family: var(--font-display);
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.02em;
             line-height: 1.05;
+            width: 100%;
+            max-width: 100%;
+            transform-origin: left center;
+        }
+        @media (max-width:1023px) {
+            .stack-title,
+            .triple-title,
+            .engine-dual,
+            .footer-title { transform-origin: center center; }
         }
         .stack-title p,
         .triple-title p,
         .engine-dual p {
             white-space: nowrap;
-            font-size: clamp(0.82rem, 2.05vw, 2.28rem);
+            font-size: clamp(0.58rem, 1.48vw, 1.68rem);
             max-width: 100%;
         }
         @media (max-width:1023px) {
             .stack-title p,
             .triple-title p,
             .engine-dual p {
-                font-size: clamp(0.68rem, 3.6vw, 1.28rem);
+                font-size: clamp(0.5rem, 2.45vw, 0.92rem);
             }
         }
         .footer-title .dim { font-style: normal; }
@@ -83,7 +93,7 @@
             will-change: transform, background-position, -webkit-text-fill-color;
             color: transparent;
             -webkit-text-fill-color: transparent;
-            -webkit-text-stroke: 1.35px rgba(180, 77, 255, 0.92);
+            -webkit-text-stroke: 1px var(--glyph-stroke);
             paint-order: stroke fill;
             background-image: repeating-linear-gradient(
                 90deg,
@@ -111,48 +121,48 @@
             75% { transform: scale(0.94, 1.06) skewX(-2deg) rotate(-0.5deg); }
         }
         @keyframes glyph-planar {
-            /* 1 — şeffaf + kırmızı kesik dikey çizgiler */
+            /* 1 — şeffaf + koyu mor outline (ref) + kırmızı çizgiler */
             0%, 24% {
                 -webkit-text-fill-color: transparent;
-                -webkit-text-stroke-color: rgba(180, 77, 255, 0.92);
+                -webkit-text-stroke-color: var(--glyph-stroke);
                 background-image:
                     repeating-linear-gradient(90deg, transparent 0 5px, rgba(255, 38, 68, 0.95) 5px 6px, transparent 6px 12px),
                     linear-gradient(90deg, transparent 0%, transparent 100%);
                 background-size: 12px 100%, 240% 100%;
                 background-position: 0 0, 100% 50%;
             }
-            /* sol kenardan beyaza geçiş */
             28%, 32% {
                 -webkit-text-fill-color: transparent;
+                -webkit-text-stroke-color: var(--glyph-stroke);
                 background-image:
                     repeating-linear-gradient(90deg, transparent 0 5px, rgba(255, 38, 68, 0.7) 5px 6px, transparent 6px 12px),
                     linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 62%);
                 background-size: 12px 100%, 240% 100%;
                 background-position: 0 0, 0% 50%;
             }
-            /* 2 — yeşil kesik dikey çizgiler */
+            /* 2 — yeşil çizgiler */
             36%, 58% {
                 -webkit-text-fill-color: transparent;
-                -webkit-text-stroke-color: rgba(180, 77, 255, 0.88);
+                -webkit-text-stroke-color: var(--glyph-stroke);
                 background-image:
                     repeating-linear-gradient(90deg, transparent 0 5px, rgba(34, 255, 130, 0.95) 5px 6px, transparent 6px 12px),
                     linear-gradient(90deg, transparent 0%, transparent 100%);
                 background-size: 12px 100%, 240% 100%;
                 background-position: 0 0, 50% 50%;
             }
-            /* sağ kenardan beyaza geçiş */
             62%, 66% {
                 -webkit-text-fill-color: transparent;
+                -webkit-text-stroke-color: var(--glyph-stroke);
                 background-image:
                     repeating-linear-gradient(90deg, transparent 0 5px, rgba(34, 255, 130, 0.65) 5px 6px, transparent 6px 12px),
                     linear-gradient(270deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 62%);
                 background-size: 12px 100%, 240% 100%;
                 background-position: 0 0, 100% 50%;
             }
-            /* 3 — beyaz dolu */
+            /* 3 — full beyaz */
             70%, 100% {
                 -webkit-text-fill-color: #ffffff;
-                -webkit-text-stroke-color: rgba(255, 255, 255, 0.22);
+                -webkit-text-stroke-color: rgba(255, 255, 255, 0.08);
                 background-image: none;
             }
         }
@@ -567,8 +577,8 @@
         }
         @media (min-width:1024px) {
             #panel-3 .engine-dual p {
-                font-size: clamp(1rem, 2.5vw, 2.85rem);
-                letter-spacing: 0.04em;
+                font-size: clamp(0.62rem, 1.65vw, 1.85rem);
+                letter-spacing: -0.02em;
             }
             #panel-3 .panel-copy {
                 font-size: clamp(0.92rem, 1.25vw, 1.08rem);
@@ -1022,6 +1032,23 @@
             });
         });
 
+        function fitDisplayTitles() {
+            document.querySelectorAll('.stack-title, .triple-title, .engine-dual, .footer-title').forEach(block => {
+                block.style.transform = 'none';
+                const parent = block.closest('.panel-inner') || block.parentElement;
+                if (!parent) return;
+                const maxW = parent.getBoundingClientRect().width - 6;
+                const blockW = block.scrollWidth;
+                if (blockW > maxW && maxW > 0) {
+                    const scale = Math.max(0.38, maxW / blockW);
+                    block.style.transform = `scale(${scale})`;
+                    block.style.transformOrigin = innerWidth >= 1024 ? 'left center' : 'center center';
+                }
+            });
+        }
+        fitDisplayTitles();
+        window.addEventListener('resize', fitDisplayTitles);
+
         const panels = [...document.querySelectorAll('.panel')];
         const PANEL_COUNT = panels.length;
         const deviceStage = document.getElementById('device-stage');
@@ -1261,8 +1288,12 @@
             gsap.fromTo(
                 panel.querySelectorAll('.split-char'),
                 { y: '110%', opacity: 0 },
-                { y: '0%', opacity: 1, duration: 0.75, stagger: 0.008, ease: 'power3.out' }
+                {
+                    y: '0%', opacity: 1, duration: 0.75, stagger: 0.008, ease: 'power3.out',
+                    onComplete: fitDisplayTitles,
+                }
             );
+            requestAnimationFrame(fitDisplayTitles);
         }
 
         let currentPanel = -1;
