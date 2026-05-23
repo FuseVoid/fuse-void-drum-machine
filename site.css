@@ -1,4 +1,5 @@
-        :root {
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
             --bg: #000209;
             --text: #eeeeee;
             --muted: #9bb8e1;
@@ -8,7 +9,7 @@
             --line: rgba(155, 184, 225, 0.25);
             --page-pad: 2.8rem;
             --split-x: 50%;
-            --right-cx: 75%;
+            --right-cx: 68%;
             --font-display: 'Syne', system-ui, sans-serif;
             --glyph-stroke: rgba(82, 62, 118, 0.78);
         }
@@ -209,19 +210,21 @@
         /* 1. sayfa — video sağda, metin solda */
         #device-stage.is-video-only {
             left: var(--right-cx);
-            width: min(calc(52vw - var(--page-pad)), 880px);
+            width: min(calc(48vw - var(--page-pad)), 820px);
             max-height: calc(100vh - 5rem);
         }
         /* 2. sayfa — sadece iPad slide */
         #device-stage.is-ipad-only {
-            width: min(calc(54vw - var(--page-pad)), 900px);
+            left: var(--right-cx);
+            width: min(calc(50vw - var(--page-pad)), 860px);
             max-height: calc(100vh - 5rem);
         }
         #device-stage.is-ipad-only .device-col--ipad { width: 100%; }
         #device-stage.is-ipad-only .device-col--phone { display: none !important; }
         /* 3. sayfa — sadece iPhone */
         #device-stage.phone-only {
-            width: min(calc(44vw - var(--page-pad)), 460px);
+            left: var(--right-cx);
+            width: min(calc(40vw - var(--page-pad)), 440px);
         }
         #device-stage.phone-only #device-col-phone { display: flex !important; }
         #device-stage.phone-only .device-col--ipad { display: none !important; }
@@ -569,22 +572,37 @@
         .stat-row .val { font-size: 1rem; font-weight: 700; }
         .stat-row .lbl { font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(238,238,238,0.35); margin-top: 0.2rem; }
 
+        @media (min-width:1024px) {
+            #panel-2 .panel-inner {
+                padding-bottom: 7rem;
+            }
+            #panel-2 .triple-title {
+                max-width: min(38vw, 28rem);
+            }
+            #panel-2 .panel-copy-right {
+                max-width: min(36vw, 26rem);
+            }
+        }
+
         /* 4. sayfa — engine alanı */
         #panel-3 .panel-inner {
-            max-width: min(44vw, 36rem);
+            max-width: min(40vw, 34rem);
         }
         @media (min-width:1024px) {
+            #panel-3 .engine-dual {
+                max-width: min(38vw, 30rem);
+            }
             #panel-3 .panel-copy {
-                font-size: clamp(0.92rem, 1.25vw, 1.08rem);
-                max-width: 30rem;
-                line-height: 1.7;
+                font-size: clamp(0.88rem, 1.1vw, 1rem);
+                max-width: 28rem;
+                line-height: 1.65;
             }
             #panel-3 .stat-row {
-                gap: 2.25rem;
-                margin-top: 2rem;
+                gap: 1.5rem;
+                margin-top: 1.5rem;
             }
             #panel-3 .stat-row .val {
-                font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+                font-size: clamp(1.25rem, 2vw, 1.85rem);
             }
             #panel-3 .stat-row .lbl {
                 font-size: 9px;
@@ -601,7 +619,7 @@
         }
         @media (min-width:1024px) {
             .feat-carousel {
-                bottom: 5.8rem; left: 6.4rem; right: auto;
+                bottom: 4.5rem; left: 6.4rem; right: auto;
                 transform: none;
             }
         }
@@ -634,9 +652,9 @@
             grid-column: 1 / -1 !important;
             width: 100%;
             max-width: 100% !important;
-            max-height: calc(100vh - 7rem);
-            padding-top: 4.5rem;
-            padding-bottom: 3rem;
+            max-height: calc(100vh - 5.5rem);
+            padding-top: 3.5rem;
+            padding-bottom: 2rem;
             padding-left: var(--page-pad);
             padding-right: var(--page-pad);
             overflow-y: auto;
@@ -651,74 +669,75 @@
             .panel-inner.panel-inner--footer {
                 grid-column: 1 / -1 !important;
                 max-width: 100% !important;
-                padding-top: 5rem;
-                max-height: calc(100vh - 8rem);
+                padding-top: 3.75rem;
+                max-height: calc(100vh - 6rem);
             }
         }
         #panel-4 .section-id {
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
+            bottom: 1.5rem;
         }
-        .footer-title { margin-bottom: 1rem; font-size: clamp(1.55rem, 3.8vw, 2.85rem); line-height: 1.12; z-index: 2; max-width: 90vw; }
-        .footer-title .dim { opacity: 0.25; font-style: italic; display: block; margin-top: 0.2em; }
-        .footer-cta { margin-bottom: 1.5rem; }
+        .footer-title { margin-bottom: 0.65rem; font-size: clamp(1.35rem, 3.2vw, 2.35rem); line-height: 1.08; z-index: 2; max-width: 90vw; }
+        .footer-title .dim { opacity: 0.25; font-style: italic; display: block; margin-top: 0.12em; }
+        .footer-cta { margin-bottom: 0.85rem; }
         .specs-block {
-            width: 100%; max-width: 52rem;
+            width: 100%; max-width: 48rem;
             text-align: left;
-            margin: 0 auto 1.25rem;
+            margin: 0 auto 0.75rem;
         }
-        .specs-head { margin-bottom: 1rem; text-align: center; }
-        .specs-head h3 { font-size: clamp(1rem, 1.8vw, 1.35rem); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: -0.02em; }
-        .specs-head p { font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(238,238,238,0.35); margin-top: 0.35rem; font-family: 'JetBrains Mono', monospace; }
+        .specs-head { margin-bottom: 0.65rem; text-align: center; }
+        .specs-head h3 { font-size: clamp(0.92rem, 1.5vw, 1.15rem); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: -0.02em; }
+        .specs-head p { font-size: 7px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(238,238,238,0.35); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace; }
         .specs-grid {
-            display: grid; gap: 1.25rem 2rem;
+            display: grid; gap: 0.85rem 1.75rem;
         }
-        @media (min-width:768px) { .specs-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem 3rem; } }
+        @media (min-width:768px) { .specs-grid { grid-template-columns: 1fr 1fr; gap: 1rem 2.25rem; } }
         .specs-col h4 {
             font-family: 'JetBrains Mono', monospace;
-            color: var(--accent); font-size: 9px; font-weight: 700;
-            letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 0.65rem;
+            color: var(--accent); font-size: 8px; font-weight: 700;
+            letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 0.45rem;
         }
         .spec-item {
-            padding: 0.45rem 0;
+            padding: 0.32rem 0;
             border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 10px; color: rgba(238,238,238,0.45);
-            display: flex; justify-content: space-between; gap: 0.75rem;
+            font-size: 9px; color: rgba(238,238,238,0.45);
+            display: flex; justify-content: space-between; gap: 0.65rem;
         }
         .spec-item .spec-label { color: var(--text); font-weight: 600; flex-shrink: 0; }
         .spec-tags {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.65rem 1.25rem;
-            font-size: 8px; font-family: 'JetBrains Mono', monospace;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1rem;
+            font-size: 7px; font-family: 'JetBrains Mono', monospace;
             letter-spacing: 0.22em; text-transform: uppercase;
             color: rgba(238,238,238,0.28);
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.75rem;
         }
         .footer-legal {
             width: 100%; max-width: 36rem;
             border-top: 1px solid rgba(255,255,255,0.06);
-            padding-top: 1.25rem;
+            padding-top: 0.85rem;
             text-align: center;
         }
         .footer-privacy {
-            font-size: 9px; line-height: 1.75; letter-spacing: 0.12em;
+            font-size: 8px; line-height: 1.6; letter-spacing: 0.1em;
             text-transform: uppercase; color: rgba(238,238,238,0.38);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
         .footer-email {
             display: inline-block;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; color: rgba(238,238,238,0.55);
+            font-size: 10px; color: rgba(238,238,238,0.55);
             text-decoration: underline; text-decoration-color: rgba(255,255,255,0.12);
-            margin-bottom: 1rem;
+            margin-bottom: 0.65rem;
         }
         .footer-email:hover { color: var(--text); }
         .footer-social {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.85rem;
-            margin-bottom: 1.25rem;
+            gap: 0.65rem;
+            margin-bottom: 0.75rem;
         }
         .footer-social__link {
             display: flex;
