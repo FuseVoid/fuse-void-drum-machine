@@ -453,6 +453,10 @@
             position: fixed; inset: 0; z-index: 1;
             pointer-events: none;
         }
+        #vapor-canvas {
+            position: fixed; inset: 0; z-index: 3;
+            pointer-events: none;
+        }
 
         .demo-tag {
             position: fixed; bottom: 1rem; left: 1rem; z-index: 200;
@@ -777,6 +781,7 @@
 <body>
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <canvas id="fx-canvas" aria-hidden="true"></canvas>
+    <canvas id="vapor-canvas" aria-hidden="true"></canvas>
 
     <a href="#" class="header-logo header-logo--visible">
         <img src="FuseVoid_Export_favicon (3).png" alt="Fuse Void">
@@ -1552,12 +1557,92 @@
         resizeBg();
         bgFrame();
 
+        /* Mouse buhar izi — boş alanlarda hafif duman */
+        const vaporCvs = document.getElementById('vapor-canvas');
+        const vapor = vaporCvs.getContext('2d');
+        let pmx = innerWidth * 0.5, pmy = innerHeight * 0.5;
+        let vaporPts = [];
+        const vaporMax = () => (innerWidth < 768 ? 70 : 120);
+
+        function resizeVapor() {
+            const d = Math.min(window.devicePixelRatio || 1, 2);
+            vaporCvs.width = innerWidth * d;
+            vaporCvs.height = innerHeight * d;
+            vaporCvs.style.width = innerWidth + 'px';
+            vaporCvs.style.height = innerHeight + 'px';
+            vapor.setTransform(d, 0, 0, d, 0, 0);
+        }
+
+        function spawnVapor(x, y, dx, dy, speed) {
+            const n = Math.min(5, 2 + Math.floor(speed / 6));
+            for (let i = 0; i < n; i++) {
+                if (vaporPts.length >= vaporMax()) vaporPts.shift();
+                const t = n > 1 ? i / n : 0;
+                vaporPts.push({
+                    x: x - dx * t + (Math.random() - 0.5) * 14,
+                    y: y - dy * t + (Math.random() - 0.5) * 14,
+                    vx: (Math.random() - 0.5) * 0.32 + dx * 0.016,
+                    vy: (Math.random() - 0.5) * 0.32 + dy * 0.016 - 0.18 - Math.random() * 0.28,
+                    life: 0.85 + Math.random() * 0.15,
+                    decay: 0.008 + Math.random() * 0.011,
+                    r: 10 + Math.random() * 16,
+                    grow: 0.28 + Math.random() * 0.34,
+                });
+            }
+        }
+
+        function vaporFrame() {
+            requestAnimationFrame(vaporFrame);
+            if (document.hidden) return;
+            vapor.clearRect(0, 0, innerWidth, innerHeight);
+            for (let i = vaporPts.length - 1; i >= 0; i--) {
+                const p = vaporPts[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.985;
+                p.vy -= 0.014;
+                p.r += p.grow;
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    vaporPts.splice(i, 1);
+                    continue;
+                }
+                const a = p.life * 0.18;
+                const g = vapor.createRadialGradient(p.x, p.y, 0, p.x, p.y - p.r * 0.12, p.r * 1.15);
+                g.addColorStop(0, `rgba(225,240,255,${a * 0.38})`);
+                g.addColorStop(0.35, `rgba(175,200,230,${a * 0.2})`);
+                g.addColorStop(0.72, `rgba(140,175,215,${a * 0.08})`);
+                g.addColorStop(1, 'rgba(120,160,210,0)');
+                vapor.fillStyle = g;
+                vapor.beginPath();
+                vapor.arc(p.x, p.y, p.r * 1.15, 0, Math.PI * 2);
+                vapor.fill();
+
+                vapor.beginPath();
+                vapor.fillStyle = `rgba(210,228,248,${a * 0.1})`;
+                vapor.arc(p.x, p.y, p.r * 0.55, 0, Math.PI * 2);
+                vapor.fill();
+            }
+        }
+
+        resizeVapor();
+        vaporFrame();
+
         /* Toz insan — hafif, panel 2–3 */
         const cvs = document.getElementById('fx-canvas');
         const fx = cvs.getContext('2d');
         let mx = innerWidth * 0.72, my = innerHeight * 0.5;
         let swayT = 0;
-        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+        document.addEventListener('mousemove', e => {
+            const nx = e.clientX, ny = e.clientY;
+            const dx = nx - pmx, dy = ny - pmy;
+            const speed = Math.hypot(dx, dy);
+            pmx = nx;
+            pmy = ny;
+            mx = nx;
+            my = ny;
+            if (speed > 0.6) spawnVapor(nx, ny, dx, dy, speed);
+        });
 
         function buildHuman() {
             const pts = [];
@@ -1651,6 +1736,7 @@
         resizeFx();
         window.addEventListener('resize', () => {
             resizeBg();
+            resizeVapor();
             resizeFx();
             if (HAS_GSAP) ScrollTrigger.refresh();
             fitDisplayTitles();
