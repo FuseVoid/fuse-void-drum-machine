@@ -55,6 +55,8 @@
             width: 100%;
             max-width: 100%;
             transform-origin: left center;
+            overflow: visible;
+            padding-right: 0.15rem;
         }
         @media (max-width:1023px) {
             .stack-title,
@@ -82,10 +84,10 @@
             display: inline-block;
             opacity: 0;
             transform: translateY(110%);
-            overflow: hidden;
+            overflow: visible;
             vertical-align: top;
-            line-height: 1.12;
-            padding: 0 0.01em;
+            line-height: 1.18;
+            padding: 0 0.02em;
         }
         .split-glyph {
             display: inline-block;
@@ -181,7 +183,7 @@
             flex-direction: column;
             justify-content: center;
             z-index: 2;
-            overflow: hidden;
+            overflow: visible;
         }
         @media (min-width:1024px) {
             .panel-inner { padding-top: 6rem; max-height: calc(100vh - 10rem); }
@@ -190,12 +192,12 @@
         @media (min-width:1024px) {
             .panel-inner {
                 grid-column: 1 / span 5;
-                max-width: min(36vw, 28rem);
+                max-width: min(42vw, 32rem);
                 padding-left: 0;
                 margin-left: 0;
                 justify-content: center;
             }
-            .panel-inner--wide { grid-column: 1 / span 5; max-width: min(36vw, 28rem); }
+            .panel-inner--wide { grid-column: 1 / span 5; max-width: min(42vw, 32rem); }
         }
         @media (max-width:1023px) {
             .panel-inner { padding-bottom: 46vh; align-items: center; text-align: center; }
@@ -840,7 +842,8 @@
                 <div class="panel-inner">
                     <div class="stack-title h1 split-block">
                         <p>Designed for</p>
-                        <p>real-time creativity</p>
+                        <p>real-time</p>
+                        <p>creativity</p>
                     </div>
                     <div class="panel-copy body-copy split-block">
                         <p>Everything is instant. Fuse Void MK1 is playable. Micro timing, chaos FX, 11-channel mixer — all touch-first.</p>
@@ -853,7 +856,8 @@
             <section class="panel" id="panel-2">
                 <div class="panel-inner panel-inner--wide">
                     <div class="triple-title h1 split-block">
-                        <p>Shape your rhythm</p>
+                        <p>Shape your</p>
+                        <p>rhythm</p>
                         <p>with micro timing</p>
                     </div>
                     <div class="panel-copy-right">
@@ -1031,12 +1035,15 @@
         function fitDisplayTitles() {
             document.querySelectorAll('.stack-title, .triple-title, .engine-dual, .footer-title').forEach(block => {
                 block.style.transform = 'none';
+                const panel = block.closest('.panel');
+                if (panel && !panel.classList.contains('is-active')) return;
                 const parent = block.closest('.panel-inner') || block.parentElement;
                 if (!parent) return;
-                const maxW = parent.getBoundingClientRect().width - 6;
+                const parentRect = parent.getBoundingClientRect();
+                const maxW = parentRect.width - 12;
                 const blockW = block.scrollWidth;
                 if (blockW > maxW && maxW > 0) {
-                    const scale = Math.max(0.58, maxW / blockW);
+                    const scale = Math.max(0.55, maxW / blockW);
                     block.style.transform = `scale(${scale})`;
                     block.style.transformOrigin = innerWidth >= 1024 ? 'left center' : 'center center';
                 }
@@ -1044,6 +1051,7 @@
         }
         fitDisplayTitles();
         window.addEventListener('resize', fitDisplayTitles);
+        window.addEventListener('load', () => setTimeout(fitDisplayTitles, 120));
 
         const panels = [...document.querySelectorAll('.panel')];
         const PANEL_COUNT = panels.length;
