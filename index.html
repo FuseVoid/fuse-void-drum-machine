@@ -777,7 +777,6 @@
 <body>
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <canvas id="fx-canvas" aria-hidden="true"></canvas>
-    <p class="demo-tag">Fuse Void <a href="index-old.html">← eski site</a></p>
 
     <a href="#" class="header-logo header-logo--visible">
         <img src="FuseVoid_Export_favicon (3).png" alt="Fuse Void">
@@ -1326,7 +1325,7 @@
                 const idx = Math.min(PANEL_COUNT - 1, Math.round(p * (PANEL_COUNT - 1)));
                 scrollPanel = idx;
                 scrollProgress = p;
-                humanAlpha = idx === 1 ? 0.55 : idx === 2 ? 0.62 : idx === 3 ? 0.92 : idx === 4 ? 0.38 : 0;
+                humanAlpha = idx === 1 ? 0.4 : idx === 2 ? 0.48 : idx === 3 ? 0.82 : idx === 4 ? 0.2 : 0;
                 humanMode = idx === 4 ? 'footer' : idx === 3 ? 'engine' : idx >= 1 && idx <= 2 ? 'side' : 'off';
                 humanScale = idx === 3 ? (innerWidth < 1024 ? 0.68 : 0.88) : idx === 2 ? 0.6 : idx === 1 ? 0.56 : 0.55;
 
@@ -1562,80 +1561,24 @@
 
         function buildHuman() {
             const pts = [];
-            const add = (cx, cy, cz, rx, ry, rz, n, spread = 1) => {
+            const add = (cx, cy, cz, rx, ry, rz, n) => {
                 for (let i = 0; i < n; i++) {
-                    const shell = Math.random() < 0.62;
-                    const mul = shell ? 1.05 + Math.random() * 0.55 : 0.45 + Math.random() * 0.4;
                     pts.push({
-                        hx: cx + (Math.random() - 0.5) * rx * spread * mul,
-                        hy: cy + (Math.random() - 0.5) * ry * spread * mul,
-                        hz: cz + (Math.random() - 0.5) * rz * spread * mul,
-                        ox: (Math.random() - 0.5) * 22,
-                        oy: (Math.random() - 0.5) * 22,
-                        drift: 0.6 + Math.random() * 1.8,
-                        x: 0, y: 0,
-                        s: shell ? 0.18 + Math.random() * 0.42 : 0.32 + Math.random() * 0.55,
-                        tw: Math.random() * Math.PI * 2,
-                        spark: 0.4 + Math.random() * 0.6,
+                        hx: cx + (Math.random() - 0.5) * rx,
+                        hy: cy + (Math.random() - 0.5) * ry,
+                        hz: cz + (Math.random() - 0.5) * rz,
+                        x: 0, y: 0, s: 0.7 + Math.random() * 1.1,
                     });
                 }
             };
-            const ribbon = (n, fn) => {
-                for (let i = 0; i < n; i++) {
-                    const t = i / Math.max(1, n - 1);
-                    const b = fn(t);
-                    pts.push({
-                        hx: b.x + (Math.random() - 0.5) * b.jx,
-                        hy: b.y + (Math.random() - 0.5) * b.jy,
-                        hz: b.z + (Math.random() - 0.5) * b.jz,
-                        ox: (Math.random() - 0.5) * 30,
-                        oy: (Math.random() - 0.5) * 30,
-                        drift: 0.8 + Math.random() * 2.2,
-                        x: 0, y: 0,
-                        s: 0.15 + Math.random() * 0.38,
-                        tw: Math.random() * Math.PI * 2,
-                        spark: 0.5 + Math.random() * 0.5,
-                    });
-                }
-            };
-            add(0, -95, 0, 26, 30, 20, 22, 1.25);
-            add(0, -35, 0, 44, 62, 26, 38, 1.2);
-            add(-48, -40, 0, 16, 54, 14, 14, 1.3);
-            add(48, -40, 0, 16, 54, 14, 14, 1.3);
-            add(-18, 55, 0, 18, 68, 16, 16, 1.25);
-            add(18, 55, 0, 18, 68, 16, 16, 1.25);
-            add(-18, 120, 0, 16, 44, 14, 10, 1.2);
-            add(18, 120, 0, 16, 44, 14, 10, 1.2);
-            ribbon(55, t => ({
-                x: Math.sin(t * Math.PI * 1.1) * 10,
-                y: -118 + t * 248,
-                z: Math.cos(t * Math.PI * 2.2) * 14,
-                jx: 32, jy: 10, jz: 24,
-            }));
-            ribbon(28, t => ({
-                x: -52 + t * 18,
-                y: -58 + t * 72,
-                z: Math.sin(t * Math.PI) * 10,
-                jx: 22, jy: 14, jz: 18,
-            }));
-            ribbon(28, t => ({
-                x: 52 - t * 18,
-                y: -58 + t * 72,
-                z: Math.sin(t * Math.PI) * 10,
-                jx: 22, jy: 14, jz: 18,
-            }));
-            ribbon(22, t => ({
-                x: -22 + Math.sin(t * Math.PI) * 6,
-                y: 52 + t * 78,
-                z: Math.cos(t * Math.PI) * 8,
-                jx: 18, jy: 12, jz: 14,
-            }));
-            ribbon(22, t => ({
-                x: 22 - Math.sin(t * Math.PI) * 6,
-                y: 52 + t * 78,
-                z: Math.cos(t * Math.PI) * 8,
-                jx: 18, jy: 12, jz: 14,
-            }));
+            add(0, -95, 0, 22, 26, 18, 50);
+            add(0, -35, 0, 38, 55, 22, 100);
+            add(-48, -40, 0, 14, 50, 12, 40);
+            add(48, -40, 0, 14, 50, 12, 40);
+            add(-18, 55, 0, 16, 65, 14, 45);
+            add(18, 55, 0, 16, 65, 14, 45);
+            add(-18, 120, 0, 14, 40, 12, 30);
+            add(18, 120, 0, 14, 40, 12, 30);
             return pts;
         }
 
@@ -1692,8 +1635,8 @@
             let z2 = p.hy * sinX + z1 * cosX;
             const persp = 420 / (420 + z2);
             return {
-                sx: cx + x1 * scale * persp + Math.sin(sway + p.hx * 0.03) * 2 + p.ox * 0.08,
-                sy: cy + y1 * scale * persp + Math.cos(sway + p.hy * 0.03) * 2 + p.oy * 0.08,
+                sx: cx + x1 * scale * persp + Math.sin(sway + p.hx * 0.03) * 2,
+                sy: cy + y1 * scale * persp + Math.cos(sway + p.hy * 0.03) * 2,
                 persp,
             };
         }
@@ -1721,44 +1664,24 @@
             if (humanAlpha < 0.02 || humanMode === 'off') return;
 
             const { x: cx, y: cy, scale } = fxAnchor(humanMode);
-            fx.globalCompositeOperation = 'lighter';
             human.forEach(p => {
-                p.ox += Math.sin(swayT * p.drift + p.tw) * 0.14;
-                p.oy += Math.cos(swayT * p.drift * 0.85 + p.tw * 1.3) * 0.12;
-
                 const { sx, sy, persp } = projectHuman(p, cx, cy + Math.sin(swayT * 0.5) * 4, scale, swayT);
-                const scatterX = Math.sin(swayT * p.drift + p.tw) * (10 + p.s * 3);
-                const scatterY = Math.cos(swayT * p.drift * 0.92 + p.tw) * (8 + p.s * 2.5);
-                const dx = sx + scatterX + p.ox * 0.35 - mx;
-                const dy = sy + scatterY + p.oy * 0.35 - my;
+                const dx = sx - mx, dy = sy - my;
                 const dist = Math.hypot(dx, dy);
-                let tx = sx + scatterX + p.ox * 0.35;
-                let ty = sy + scatterY + p.oy * 0.35;
-                if (dist < 100 && dist > 0) {
-                    const f = (1 - dist / 100) * 0.65;
-                    tx = sx + scatterX + (dx / dist) * f * 36;
-                    ty = sy + scatterY + (dy / dist) * f * 36;
+                let tx = sx, ty = sy;
+                if (dist < 120 && dist > 0) {
+                    const f = (1 - dist / 120) * 0.85;
+                    tx = sx + (dx / dist) * f * 48;
+                    ty = sy + (dy / dist) * f * 48;
                 }
-                p.x += (tx - p.x) * 0.07;
-                p.y += (ty - p.y) * 0.07;
-
-                const twinkle = 0.28 + Math.sin(swayT * 3.6 + p.tw) * 0.72;
-                if (twinkle < 0.38) return;
-
-                const a = humanAlpha * twinkle * p.spark * (0.38 + persp * 0.48);
-                const r = p.s * persp * 0.65;
-
+                p.x += (tx - p.x) * 0.12;
+                p.y += (ty - p.y) * 0.12;
+                const a = humanAlpha * (0.3 + persp * 0.55);
+                fx.fillStyle = `rgba(155,184,225,${Math.min(1, a)})`;
                 fx.beginPath();
-                fx.fillStyle = `rgba(180,210,255,${a * 0.06})`;
-                fx.arc(p.x, p.y, r * 2.4, 0, Math.PI * 2);
-                fx.fill();
-
-                fx.beginPath();
-                fx.fillStyle = `rgba(255,255,255,${Math.min(0.92, a * 0.82)})`;
-                fx.arc(p.x, p.y, r * 0.32, 0, Math.PI * 2);
+                fx.arc(p.x, p.y, p.s * persp * 0.85, 0, Math.PI * 2);
                 fx.fill();
             });
-            fx.globalCompositeOperation = 'source-over';
         }
         frame();
     </script>
