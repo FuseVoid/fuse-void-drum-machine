@@ -445,6 +445,10 @@
         .device-dots button.on { background: var(--muted); transform: scale(1.35); }
         .mono { font-family: 'JetBrains Mono', monospace; }
 
+        #bg-canvas {
+            position: fixed; inset: 0; z-index: 0;
+            pointer-events: none;
+        }
         #fx-canvas {
             position: fixed; inset: 0; z-index: 1;
             pointer-events: none;
@@ -771,6 +775,7 @@
     </style>
 </head>
 <body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <canvas id="fx-canvas" aria-hidden="true"></canvas>
     <p class="demo-tag">Fuse Void <a href="index-old.html">← eski site</a></p>
 
@@ -1317,6 +1322,7 @@
                 const seg = 1 / (PANEL_COUNT - 1);
                 const idx = Math.min(PANEL_COUNT - 1, Math.round(p * (PANEL_COUNT - 1)));
                 scrollPanel = idx;
+                scrollProgress = p;
                 humanAlpha = idx === 1 ? 0.4 : idx === 2 ? 0.48 : idx === 3 ? 0.82 : idx === 4 ? 0.2 : 0;
                 humanMode = idx === 4 ? 'footer' : idx === 3 ? 'engine' : idx >= 1 && idx <= 2 ? 'side' : 'off';
                 humanScale = idx === 3 ? (innerWidth < 1024 ? 0.68 : 0.88) : idx === 2 ? 0.6 : idx === 1 ? 0.56 : 0.55;
@@ -1343,6 +1349,149 @@
         deviceStage.classList.add('is-live', 'is-video-only');
         deviceStage.style.opacity = 1;
         document.getElementById('scroll-btn').onclick = () => window.scrollBy({ top: innerHeight * 0.85, behavior: 'smooth' });
+
+        /* Hashgraph tarzı arka plan — hafif sıvı ışık + yüzen kayalar + parçacık akışı */
+        const bgCvs = document.getElementById('bg-canvas');
+        const bg = bgCvs.getContext('2d');
+        let bgT = 0;
+        let scrollProgress = 0;
+        const bgDpr = () => Math.min(window.devicePixelRatio || 1, 1.75);
+
+        function makeRock() {
+            const verts = [];
+            const sides = 5 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < sides; i++) {
+                const a = (i / sides) * Math.PI * 2;
+                verts.push({ a, r: 0.45 + Math.random() * 0.55 });
+            }
+            return {
+                x: Math.random(), y: Math.random(),
+                z: 0.15 + Math.random() * 0.85,
+                vx: (Math.random() - 0.5) * 0.00005,
+                vy: (Math.random() - 0.5) * 0.00004,
+                rot: Math.random() * Math.PI * 2,
+                rotV: (Math.random() - 0.5) * 0.0003,
+                size: 18 + Math.random() * 58,
+                verts, ph: Math.random() * Math.PI * 2,
+            };
+        }
+
+        function makeStream(n) {
+            return Array.from({ length: n }, (_, i) => ({
+                t: i / n,
+                speed: 0.00012 + Math.random() * 0.0001,
+                off: Math.random() * 10,
+                r: 0.35 + Math.random() * 1.1,
+                a: 0.12 + Math.random() * 0.38,
+            }));
+        }
+
+        let bgRocks = [];
+        let bgStream = [];
+
+        function resizeBg() {
+            const d = bgDpr();
+            bgCvs.width = innerWidth * d;
+            bgCvs.height = innerHeight * d;
+            bgCvs.style.width = innerWidth + 'px';
+            bgCvs.style.height = innerHeight + 'px';
+            bg.setTransform(d, 0, 0, d, 0, 0);
+            const n = innerWidth < 768 ? 9 : 17;
+            bgRocks = Array.from({ length: n }, makeRock);
+            bgStream = makeStream(innerWidth < 768 ? 40 : 75);
+        }
+
+        function drawRock(r, t, parallax) {
+            r.x += r.vx;
+            r.y += r.vy;
+            r.rot += r.rotV;
+            if (r.x < -0.1) r.x = 1.1;
+            if (r.x > 1.1) r.x = -0.1;
+            if (r.y < -0.1) r.y = 1.1;
+            if (r.y > 1.1) r.y = -0.1;
+
+            const px = (r.x + Math.sin(t * 0.12 + r.ph) * 0.01) * innerWidth;
+            const py = (r.y + Math.cos(t * 0.1 + r.ph) * 0.008 + parallax * 0.04) * innerHeight;
+            const sz = r.size * (0.4 + r.z * 0.9);
+            const alpha = 0.35 + r.z * 0.55;
+
+            bg.save();
+            bg.translate(px, py);
+            bg.rotate(r.rot + Math.sin(t * 0.15 + r.ph) * 0.06);
+            bg.beginPath();
+            r.verts.forEach((v, i) => {
+                const rad = v.r * sz;
+                const vx = Math.cos(v.a) * rad;
+                const vy = Math.sin(v.a) * rad;
+                if (i === 0) bg.moveTo(vx, vy);
+                else bg.lineTo(vx, vy);
+            });
+            bg.closePath();
+            const fill = bg.createLinearGradient(-sz, -sz, sz, sz);
+            fill.addColorStop(0, `rgba(6,10,18,${alpha})`);
+            fill.addColorStop(0.55, `rgba(12,18,32,${alpha * 0.95})`);
+            fill.addColorStop(1, `rgba(2,4,8,${alpha * 1.1})`);
+            bg.fillStyle = fill;
+            bg.fill();
+            bg.strokeStyle = `rgba(70,110,170,${0.06 + r.z * 0.14})`;
+            bg.lineWidth = 1;
+            bg.stroke();
+            bg.restore();
+        }
+
+        function bgFrame() {
+            requestAnimationFrame(bgFrame);
+            if (document.hidden) return;
+            bgT += 0.014;
+            const w = innerWidth;
+            const h = innerHeight;
+            bg.clearRect(0, 0, w, h);
+
+            const base = bg.createLinearGradient(0, 0, w * 0.35, h);
+            base.addColorStop(0, '#010208');
+            base.addColorStop(0.45, '#020612');
+            base.addColorStop(1, '#030818');
+            bg.fillStyle = base;
+            bg.fillRect(0, 0, w, h);
+
+            [
+                { x: 0.6, y: 0.42, r: 0.52, ph: 0 },
+                { x: 0.35, y: 0.58, r: 0.4, ph: 2.1 },
+                { x: 0.75, y: 0.25, r: 0.32, ph: 4.2 },
+            ].forEach(b => {
+                const bx = (b.x + Math.sin(bgT * 0.065 + b.ph) * 0.03) * w;
+                const by = (b.y + Math.cos(bgT * 0.048 + b.ph) * 0.022 + scrollProgress * 0.045) * h;
+                const br = b.r * Math.min(w, h);
+                const g = bg.createRadialGradient(bx, by, 0, bx, by, br);
+                g.addColorStop(0, 'rgba(42,88,150,0.16)');
+                g.addColorStop(0.5, 'rgba(18,40,72,0.07)');
+                g.addColorStop(1, 'rgba(0,2,9,0)');
+                bg.fillStyle = g;
+                bg.fillRect(0, 0, w, h);
+            });
+
+            bgStream.forEach(p => {
+                p.t = (p.t + p.speed) % 1;
+                const cx = w * (0.57 + Math.sin(p.t * Math.PI * 2 + bgT * 0.18 + p.off) * 0.055);
+                const cy = h * (1.02 - p.t * 1.05);
+                const sx = Math.sin(p.t * 14 + p.off) * (14 + p.r * 6);
+                bg.beginPath();
+                bg.fillStyle = `rgba(190,220,255,${p.a * (0.25 + p.t * 0.75)})`;
+                bg.arc(cx + sx, cy, p.r, 0, Math.PI * 2);
+                bg.fill();
+            });
+
+            [...bgRocks].sort((a, b) => a.z - b.z).forEach(r => drawRock(r, bgT, scrollProgress));
+
+            const vig = bg.createRadialGradient(w * 0.5, h * 0.44, h * 0.12, w * 0.5, h * 0.44, h * 0.85);
+            vig.addColorStop(0, 'rgba(0,2,9,0)');
+            vig.addColorStop(1, 'rgba(0,2,9,0.62)');
+            bg.fillStyle = vig;
+            bg.fillRect(0, 0, w, h);
+        }
+
+        resizeBg();
+        bgFrame();
 
         /* Toz insan — hafif, panel 2–3 */
         const cvs = document.getElementById('fx-canvas');
@@ -1441,7 +1590,7 @@
             fx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
         }
         resizeFx();
-        window.addEventListener('resize', () => { resizeFx(); ScrollTrigger.refresh(); });
+        window.addEventListener('resize', () => { resizeBg(); resizeFx(); ScrollTrigger.refresh(); fitDisplayTitles(); });
 
         function frame() {
             requestAnimationFrame(frame);
