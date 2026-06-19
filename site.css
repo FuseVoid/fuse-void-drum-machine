@@ -856,3 +856,179 @@
         .nav-dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 90; }
         .nav-dots button { width: 6px; height: 6px; border-radius: 50%; border: none; background: rgba(155,184,225,0.25); cursor: pointer; padding: 0; transition: 0.3s; }
         .nav-dots button.on { background: #fff; transform: scale(1.35); box-shadow: 0 0 8px rgba(255,255,255,0.45); }
+
+        /* ========== MOBILE LAYOUT — stacked scroll, desktop GSAP pin untouched ========== */
+        html.layout-mobile {
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        html.layout-mobile body {
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        html.layout-mobile #fx-canvas,
+        html.layout-mobile #vapor-canvas,
+        html.layout-mobile .scrollbar,
+        html.layout-mobile .nav-dots,
+        html.layout-mobile .hero-scroll {
+            display: none !important;
+        }
+        html.layout-mobile #scroll-track {
+            height: auto !important;
+            min-height: 0 !important;
+            touch-action: pan-y;
+        }
+        html.layout-mobile #pin-viewport {
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            position: static !important;
+        }
+        html.layout-mobile .panel {
+            position: relative !important;
+            inset: auto !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            min-height: auto !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+            padding: 2rem 1.25rem 2.5rem !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        html.layout-mobile #panel-0 {
+            padding-top: 5.5rem !important;
+            padding-bottom: 2rem !important;
+        }
+        html.layout-mobile #panel-4 {
+            padding-bottom: 3.5rem !important;
+            border-bottom: none;
+        }
+        html.layout-mobile .panel-inner,
+        html.layout-mobile .panel-inner--wide,
+        html.layout-mobile .panel-inner--footer {
+            max-height: none !important;
+            padding-top: 0 !important;
+            padding-bottom: 1rem !important;
+            align-items: center;
+            text-align: center;
+        }
+        html.layout-mobile .stack-title p,
+        html.layout-mobile .triple-title p,
+        html.layout-mobile .engine-dual p {
+            white-space: normal !important;
+            font-size: clamp(1.35rem, 7.5vw, 2.1rem) !important;
+            line-height: 1.14 !important;
+            margin-left: 0 !important;
+        }
+        html.layout-mobile .split-word {
+            white-space: normal !important;
+        }
+        html.layout-mobile .split-char {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+        html.layout-mobile .split-glyph {
+            animation: none !important;
+        }
+        html.layout-mobile .stack-title,
+        html.layout-mobile .triple-title,
+        html.layout-mobile .engine-dual,
+        html.layout-mobile .footer-title {
+            transform: none !important;
+            text-align: center;
+        }
+        html.layout-mobile .body-copy {
+            max-width: 20rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        html.layout-mobile #device-stage,
+        html.layout-mobile #device-stage.is-video-only,
+        html.layout-mobile #device-stage.is-ipad-only,
+        html.layout-mobile #device-stage.phone-only {
+            position: relative !important;
+            left: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            width: 100% !important;
+            max-width: 18rem !important;
+            margin: 1.25rem auto 0 !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            max-height: none !important;
+        }
+        html.layout-mobile .device-stage__inner {
+            padding: 0 !important;
+        }
+        html.layout-mobile .device-shell--ipad {
+            aspect-ratio: 4 / 3;
+            width: 100%;
+        }
+        html.layout-mobile .panel-cta {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin: 1.25rem auto 0 !important;
+            text-align: center;
+            display: block !important;
+        }
+        html.layout-mobile .section-id {
+            position: relative !important;
+            left: auto !important;
+            bottom: auto !important;
+            margin-top: 1.25rem !important;
+            text-align: center;
+        }
+        html.layout-mobile .panel-copy-right {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        html.layout-mobile .feat-carousel {
+            position: relative !important;
+            bottom: auto !important;
+            left: auto !important;
+            transform: none !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            justify-content: center;
+            margin: 1.25rem auto 0 !important;
+            width: 100%;
+            max-width: 18rem;
+        }
+        html.layout-mobile .stat-row {
+            justify-content: center;
+        }
+        html.layout-mobile .specs-grid {
+            grid-template-columns: 1fr !important;
+        }
+        html.layout-mobile .header-logo {
+            top: 1rem;
+            left: 1rem;
+        }
+        html.layout-mobile .header-logo img {
+            height: 2.4rem;
+            width: 2.4rem;
+        }
+        html.layout-mobile .header-actions {
+            top: 1rem;
+            right: 1rem;
+        }
+        html.layout-mobile .header-link {
+            font-size: 8px;
+            padding: 0.45rem 0.75rem;
+        }
+        html.layout-mobile .price-badge {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        html.layout-mobile .btn--store {
+            min-width: auto;
+            width: 100%;
+            max-width: 18rem;
+        }

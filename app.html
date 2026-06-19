@@ -16,6 +16,7 @@
     <meta name="twitter:description" content="Professional drum machine for iOS. 113 pro samples and studio-grade sequencer.">
     <meta name="twitter:image" content="https://fusevoid.github.io/fuse-void-drum-machine/og-preview.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>if(matchMedia('(max-width:1023px)').matches)document.documentElement.classList.add('layout-mobile');</script>
     <title>Fuse Void | Professional Drum Machine</title>
     <meta name="description" content="Professional drum machine for iOS. $9.99 one-time purchase. 113 pro samples, real-time creativity, studio-grade sequencer.">
     <link rel="icon" type="image/png" href="sonfuse_transparent.png">
@@ -225,6 +226,10 @@
         const HAS_GSAP = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
         if (HAS_GSAP) gsap.registerPlugin(ScrollTrigger);
 
+        const MOBILE_MQ = window.matchMedia('(max-width: 1023px)');
+        const IS_MOBILE_LAYOUT = MOBILE_MQ.matches;
+        if (IS_MOBILE_LAYOUT) document.documentElement.classList.add('layout-mobile');
+
         /* Link placeholders — URL'leri buradan güncelle */
         /* App Store — komutan Connect’te yayınlayınca gerçek URL buraya */
         const SITE_LINKS = {
@@ -301,6 +306,12 @@
         });
 
         function fitDisplayTitles() {
+            if (IS_MOBILE_LAYOUT) {
+                document.querySelectorAll('.stack-title, .triple-title, .engine-dual, .footer-title').forEach(block => {
+                    block.style.transform = 'none';
+                });
+                return;
+            }
             document.querySelectorAll('.stack-title, .triple-title, .engine-dual, .footer-title').forEach(block => {
                 block.style.transform = 'none';
                 const panel = block.closest('.panel');
@@ -536,7 +547,12 @@
         panels.forEach((_, i) => {
             const b = document.createElement('button');
             b.onclick = () => {
+                if (IS_MOBILE_LAYOUT) {
+                    panels[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
                 const st = ScrollTrigger.getById('main');
+                if (!st) return;
                 window.scrollTo({ top: (i / (PANEL_COUNT - 1)) * (st.end - st.start) + st.start, behavior: 'smooth' });
             };
             dotsWrap.appendChild(b);
@@ -574,7 +590,46 @@
         let humanMode = 'off';
         let humanScale = 0.55;
         let scrollProgress = 0;
-        if (HAS_GSAP) {
+
+        function revealMobileText() {
+            document.querySelectorAll('.split-char').forEach(c => {
+                c.style.opacity = '1';
+                c.style.transform = 'none';
+            });
+        }
+
+        function initMobileLayout() {
+            revealMobileText();
+            panels.forEach(p => {
+                p.classList.add('is-active');
+                p.style.visibility = 'visible';
+                p.style.opacity = '1';
+            });
+
+            const panel0 = document.getElementById('panel-0');
+            const heroScroll = document.getElementById('scroll-btn');
+            panel0.insertBefore(deviceStage, heroScroll);
+
+            const panel2 = document.getElementById('panel-2');
+            const panel2Cta = panel2.querySelector('.panel-cta');
+            panel2.insertBefore(featCarousel, panel2Cta);
+            featCarousel.style.opacity = '1';
+            featCarousel.style.pointerEvents = 'auto';
+
+            deviceStage.style.opacity = '1';
+            deviceStage.classList.add('is-live', 'is-video-only');
+            bindGallery(0);
+            showVideoOnly();
+            currentPanel = 0;
+
+            heroScroll.onclick = () => {
+                document.getElementById('panel-1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+        }
+
+        if (IS_MOBILE_LAYOUT) {
+            initMobileLayout();
+        } else if (HAS_GSAP) {
         ScrollTrigger.normalizeScroll(true);
         ScrollTrigger.create({
             id: 'main',
@@ -612,6 +667,10 @@
             }
         });
         switchPanel(0);
+        bindGallery(0);
+        deviceStage.classList.add('is-live', 'is-video-only');
+        deviceStage.style.opacity = 1;
+        document.getElementById('scroll-btn').onclick = () => window.scrollBy({ top: innerHeight * 0.85, behavior: 'smooth' });
         } else {
             panels.forEach((p, i) => {
                 p.classList.toggle('is-active', i === 0);
@@ -623,11 +682,13 @@
                 });
             });
             currentPanel = 0;
+            bindGallery(0);
+            deviceStage.classList.add('is-live', 'is-video-only');
+            deviceStage.style.opacity = 1;
+            document.getElementById('scroll-btn').onclick = () => window.scrollBy({ top: innerHeight * 0.85, behavior: 'smooth' });
         }
-        bindGallery(0);
-        deviceStage.classList.add('is-live', 'is-video-only');
-        deviceStage.style.opacity = 1;
-        document.getElementById('scroll-btn').onclick = () => window.scrollBy({ top: innerHeight * 0.85, behavior: 'smooth' });
+
+        MOBILE_MQ.addEventListener('change', () => location.reload());
 
         /* Hashgraph tarzı arka plan — hafif sıvı ışık + yüzen kayalar + parçacık akışı */
         const bgCvs = document.getElementById('bg-canvas');
