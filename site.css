@@ -514,6 +514,34 @@
         }
         .header-link:hover { border-color: var(--muted); }
 
+        @media (max-width: 1023px) {
+            .header-logo {
+                top: 0.85rem;
+                left: 0.85rem;
+                gap: 0;
+            }
+            .header-logo img {
+                height: 2.25rem;
+                width: 2.25rem;
+                opacity: 1;
+                transform: none;
+            }
+            .header-logo span { display: none; }
+            .header-actions {
+                top: 0.85rem;
+                right: 0.85rem;
+                gap: 0.35rem;
+                max-width: calc(100vw - 5rem);
+                justify-content: flex-end;
+            }
+            .header-actions #link-app-store,
+            #link-app-store { display: none !important; }
+            .header-link {
+                font-size: 8px;
+                padding: 0.45rem 0.7rem;
+            }
+        }
+
         .scrollbar { display: none; position: fixed; right: 6.4rem; top: 50%; transform: translateY(-50%); width: 2px; height: 16rem; z-index: 50; }
         @media (min-width:768px) { .scrollbar { display: block; } }
         .scrollbar__track { position: absolute; inset: 0; background: rgba(155,184,225,0.25); }
