@@ -1036,6 +1036,9 @@
             font-size: 8px;
             padding: 0.45rem 0.75rem;
         }
+        html.layout-mobile #link-app-store {
+            display: none !important;
+        }
         html.layout-mobile .price-badge {
             margin-left: auto;
             margin-right: auto;
