@@ -24,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <link rel="stylesheet" href="site.css?v=6">
+    <link rel="stylesheet" href="site.css?v=7">
 </head>
 <body>
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
@@ -76,6 +76,18 @@
             <button type="button" class="device-arrow" id="dev-next" aria-label="Sonraki">›</button>
         </div>
         <div class="device-dots" id="device-dots"></div>
+    </div>
+
+    <div id="mobile-shot-gallery" class="mobile-shot-gallery" hidden aria-label="App screenshots carousel">
+        <p class="mobile-shot-gallery__title">See the app</p>
+        <div class="mobile-shot-gallery__viewport" id="mobile-shot-viewport">
+            <div class="mobile-shot-gallery__track" id="mobile-shot-track"></div>
+        </div>
+        <div class="mobile-shot-gallery__controls">
+            <button type="button" class="mobile-shot-gallery__arrow" id="mobile-shot-prev" aria-label="Previous screenshot">‹</button>
+            <div class="mobile-shot-gallery__dots" id="mobile-shot-dots"></div>
+            <button type="button" class="mobile-shot-gallery__arrow" id="mobile-shot-next" aria-label="Next screenshot">›</button>
+        </div>
     </div>
 
     <div id="scroll-track">
@@ -601,6 +613,65 @@
             });
         }
 
+        function initMobileShotGallery() {
+            const MOBILE_SHOWCASE = [
+                { src: '1FuseVoidipad.png', tag: 'iPad · Main UI', frame: 'ipad' },
+                { src: '7 FuseVoid ipad.png', tag: 'iPad · Chaos FX', frame: 'ipad' },
+                { src: '5 FuseVoid ipad.png', tag: 'iPad · Matrix', frame: 'ipad' },
+                { src: '2 FuseVoid ipad.png', tag: 'iPad · Studio', frame: 'ipad' },
+                { src: '5iphone.png', tag: 'iPhone', frame: 'phone' },
+                { src: '6iphone.png', tag: 'iPhone', frame: 'phone' },
+                { src: '1iphone.png', tag: 'iPhone', frame: 'phone' },
+                { src: '4iphone.png', tag: 'iPhone', frame: 'phone' },
+            ];
+
+            const track = document.getElementById('mobile-shot-track');
+            const dotsWrap = document.getElementById('mobile-shot-dots');
+            const viewport = document.getElementById('mobile-shot-viewport');
+            const prevBtn = document.getElementById('mobile-shot-prev');
+            const nextBtn = document.getElementById('mobile-shot-next');
+            if (!track || !dotsWrap || !viewport) return;
+
+            let shotIdx = 0;
+
+            MOBILE_SHOWCASE.forEach((item, i) => {
+                const slide = document.createElement('div');
+                slide.className = 'mobile-shot-slide';
+                slide.innerHTML = `
+                    <span class="mobile-shot-slide__tag">${item.tag}</span>
+                    <div class="mobile-shot-frame mobile-shot-frame--${item.frame}">
+                        <img src="${item.src}" alt="${item.tag}" loading="lazy" decoding="async">
+                    </div>`;
+                track.appendChild(slide);
+
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', `Screenshot ${i + 1}`);
+                dot.addEventListener('click', () => goShot(i));
+                dotsWrap.appendChild(dot);
+            });
+
+            function goShot(i) {
+                shotIdx = (i + MOBILE_SHOWCASE.length) % MOBILE_SHOWCASE.length;
+                track.style.transform = `translate3d(-${shotIdx * 100}%, 0, 0)`;
+                [...dotsWrap.children].forEach((d, j) => d.classList.toggle('on', j === shotIdx));
+            }
+
+            prevBtn?.addEventListener('click', () => goShot(shotIdx - 1));
+            nextBtn?.addEventListener('click', () => goShot(shotIdx + 1));
+
+            let touchStartX = 0;
+            viewport.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].clientX;
+            }, { passive: true });
+            viewport.addEventListener('touchend', (e) => {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                if (Math.abs(dx) > 36) goShot(shotIdx + (dx < 0 ? 1 : -1));
+            }, { passive: true });
+
+            goShot(0);
+        }
+
         function initMobileLayout() {
             revealMobileText();
             panels.forEach(p => {
@@ -611,7 +682,12 @@
 
             const panel0 = document.getElementById('panel-0');
             const heroScroll = document.getElementById('scroll-btn');
+            const mobileGallery = document.getElementById('mobile-shot-gallery');
             panel0.insertBefore(deviceStage, heroScroll);
+            if (mobileGallery) {
+                mobileGallery.hidden = false;
+                panel0.insertBefore(mobileGallery, heroScroll);
+            }
 
             const panel2 = document.getElementById('panel-2');
             const panel2Cta = panel2.querySelector('.panel-cta');
@@ -623,6 +699,7 @@
             deviceStage.classList.add('is-live', 'is-video-only');
             bindGallery(0);
             showVideoOnly();
+            initMobileShotGallery();
             currentPanel = 0;
 
             heroScroll.onclick = () => {
