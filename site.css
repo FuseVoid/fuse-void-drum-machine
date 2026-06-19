@@ -797,6 +797,19 @@
             text-transform: uppercase; color: rgba(238,238,238,0.38);
             margin-bottom: 0.5rem;
         }
+        .footer-privacy-link {
+            margin-bottom: 0.55rem;
+        }
+        .footer-privacy-link a {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(155, 184, 225, 0.75);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(155, 184, 225, 0.25);
+        }
+        .footer-privacy-link a:hover { color: var(--text); }
         .footer-email {
             display: inline-block;
             font-family: 'JetBrains Mono', monospace;
@@ -1032,3 +1045,180 @@
             width: 100%;
             max-width: 18rem;
         }
+
+        /* ========== PRIVACY PAGE ========== */
+        body.privacy-page {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+        .privacy-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(0, 2, 9, 0.92);
+            backdrop-filter: blur(10px);
+        }
+        @media (min-width: 768px) {
+            .privacy-header { padding: 1.5rem 2.5rem; }
+        }
+        .privacy-header__logo {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+        .privacy-header__logo img {
+            width: 2.4rem;
+            height: 2.4rem;
+            object-fit: contain;
+        }
+        .privacy-header__logo span {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+        }
+        .privacy-header__nav {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .privacy-header__link {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text);
+            text-decoration: none;
+            border: 1px solid var(--line);
+            padding: 0.5rem 0.85rem;
+            white-space: nowrap;
+            transition: border-color 0.25s;
+        }
+        .privacy-header__link:hover { border-color: var(--muted); }
+        .privacy-main {
+            flex: 1;
+            width: 100%;
+            max-width: 42rem;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 3rem;
+        }
+        @media (min-width: 768px) {
+            .privacy-main { padding: 3rem 2rem 4rem; }
+        }
+        .privacy-eyebrow {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.65rem;
+        }
+        .privacy-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.75rem, 5vw, 2.35rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .privacy-updated {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(155, 184, 225, 0.65);
+            margin-bottom: 1.5rem;
+        }
+        .privacy-lead {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: rgba(238, 238, 238, 0.82);
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .privacy-section {
+            margin-bottom: 1.65rem;
+        }
+        .privacy-section h2 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.65rem;
+        }
+        .privacy-section p,
+        .privacy-section li {
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: rgba(238, 238, 238, 0.72);
+        }
+        .privacy-section p + p { margin-top: 0.65rem; }
+        .privacy-section ul {
+            margin: 0.65rem 0 0 1.1rem;
+            padding: 0;
+        }
+        .privacy-section li + li { margin-top: 0.35rem; }
+        .privacy-section a {
+            color: var(--muted);
+            text-decoration: underline;
+            text-decoration-color: rgba(155, 184, 225, 0.35);
+        }
+        .privacy-section a:hover { color: var(--text); }
+        .privacy-email {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text) !important;
+            margin-top: 0.25rem;
+        }
+        .privacy-contact {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .privacy-back {
+            margin-top: 1.25rem;
+        }
+        .privacy-back a {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            padding: 0.55rem 1rem;
+            display: inline-block;
+        }
+        .privacy-back a:hover {
+            border-color: var(--muted);
+            color: var(--text);
+        }
+        .privacy-footer {
+            padding: 1.25rem 1.5rem 1.75rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .privacy-footer p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: rgba(238, 238, 238, 0.28);
+        }
+        .privacy-footer p + p { margin-top: 0.35rem; }
